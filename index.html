@@ -185,25 +185,6 @@ button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit
 .steps{display:flex;gap:6px;margin-bottom:22px}
 .steps i{flex:1;height:5px;border-radius:99px;background:var(--surface-3)}
 .steps i.done{background:var(--primary)}
-.demo-cred{
-  border:1.5px dashed var(--primary);
-  background:var(--primary-soft);
-  border-radius:var(--r-sm);
-  padding:12px 14px;
-  margin-bottom:16px;
-}
-.demo-cred-head{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;color:var(--primary);margin-bottom:10px}
-.demo-cred-row{
-  display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface);
-  border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:.15s;
-}
-.demo-cred-row:hover{border-color:var(--primary);transform:translateY(-1px)}
-.demo-cred-row:last-child{margin-bottom:0}
-.demo-cred-row .role{font-size:15px}
-.demo-cred-row .info{flex:1;min-width:0}
-.demo-cred-row .em{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.demo-cred-row .pw{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--muted)}
-.demo-cred-row .fill{font-size:11px;font-weight:800;color:var(--primary);white-space:nowrap}
 
 /* ============================================================
    COMPONENTS
@@ -404,33 +385,6 @@ function priceApprox(usd){
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 /* ============================================================
-   0.1 DEMO ACCOUNTS (preset login credentials)
-   ============================================================ */
-const DEMO_ACCOUNTS = {
-  'ava@collabry.app': {
-    password: 'Creator2026!',
-    role: 'influencer',
-    name: 'Ava Chen',
-    tier: 'creator',
-    verified: true,
-    verificationStatus: 'approved',
-    onboarded: true,
-    joined: '2026-07-15'
-  },
-  'jordan@lumenskin.com': {
-    password: 'Brand2026!',
-    role: 'brand',
-    name: 'Jordan Blake',
-    company: 'Lumen Skincare',
-    tier: 'marketing',
-    verified: true,
-    verificationStatus: 'approved',
-    onboarded: true,
-    joined: '2026-06-02'
-  }
-};
-
-/* ============================================================
    1. SEED DATA
    ============================================================ */
 const NICHES = ['Fitness','Beauty','Tech','Food','Travel','Fashion','Gaming','Finance','Parenting','Sustainability'];
@@ -540,7 +494,6 @@ const state = {
   authMode:'signup',        // signup | login | otp
   role:'influencer',
   authForm:{email:'', password:'', company:''},
-  authError:'',
   otp:'',
   otpError:'',
   onboardStep:0,
@@ -564,6 +517,7 @@ const state = {
   ],
   watchlist:['c2'],
   toasts:[],
+  // seeded collections (mutable copies)
   influencers: JSON.parse(JSON.stringify(SEED_INFLUENCERS)),
   campaigns:   JSON.parse(JSON.stringify(SEED_CAMPAIGNS)),
   collabs:     JSON.parse(JSON.stringify(SEED_COLLABS)),
@@ -577,7 +531,7 @@ const state = {
   rates: Object.fromEntries(RATE_ITEMS.map(r => [r.id, {value: Math.round(r.base*1.4), on:true}])),
   ratesPublic:true,
   ratesNegotiable:true,
-  gracePeriod:0
+  gracePeriod:0 // 0 = none, 1..4 = day of grace
 };
 
 /* ---------- persistence ---------- */
@@ -709,35 +663,10 @@ function renderAuth(){
   const strengthLabel = !pw ? '' : score <= 2 ? 'Weak' : score === 3 ? 'Good' : 'Strong';
   const strengthCls = score <= 2 ? 'bad' : score === 3 ? 'mid' : 'ok';
 
-  const demoCredCard = !isSignup ? `
-    <div class="demo-cred">
-      <div class="demo-cred-head">
-        <span>🔑</span><span>Demo credentials — tap to autofill</span>
-      </div>
-      <div class="demo-cred-row" data-action="fill-demo" data-email="ava@collabry.app">
-        <span class="role">🎬</span>
-        <div class="info">
-          <div class="em">ava@collabry.app</div>
-          <div class="pw">Creator2026! · Influencer</div>
-        </div>
-        <span class="fill">USE →</span>
-      </div>
-      <div class="demo-cred-row" data-action="fill-demo" data-email="jordan@lumenskin.com">
-        <span class="role">🏢</span>
-        <div class="info">
-          <div class="em">jordan@lumenskin.com</div>
-          <div class="pw">Brand2026! · Brand Rep</div>
-        </div>
-        <span class="fill">USE →</span>
-      </div>
-    </div>` : '';
-
   c.innerHTML = `
     <div class="logo" style="padding-left:0;margin-bottom:22px"><div class="logo-mark">◆</div> Collabry</div>
     <h1>${isSignup ? 'Create your account' : 'Welcome back'}</h1>
     <p class="muted mt8">${isSignup ? 'Join the marketplace in under 2 minutes.' : 'Sign in to continue to your dashboard.'}</p>
-
-    ${demoCredCard}
 
     <div class="seg mt16" id="roleSeg">
       <button class="seg-btn ${state.role==='influencer'?'active':''}" data-action="auth-role" data-role="influencer">🎬 Influencer</button>
@@ -794,6 +723,7 @@ function renderAuth(){
   $('#pwInput')?.addEventListener('input', e => {
     state.authForm.password = e.target.value;
     state.authError = '';
+    // live strength update without full re-render
     const chk2 = pwChecks(e.target.value);
     const s2 = Object.values(chk2).filter(Boolean).length;
     const cls = s2 <= 2 ? 'bad' : s2 === 3 ? 'mid' : 'ok';
@@ -812,66 +742,34 @@ function handleAuthSubmit(){
     state.authError = 'Please enter a valid email address.';
     return renderAuth();
   }
-
-  /* ---------- LOGIN MODE ---------- */
-  if (state.authMode === 'login'){
-    const demo = DEMO_ACCOUNTS[email];
-    if (demo){
-      if (pw !== demo.password){
-        state.authError = 'Incorrect password for this demo account. Hint: check the credentials card above.';
-        return renderAuth();
-      }
-      // Set role to match the demo account
-      state.role = demo.role;
-      state.user = {
-        id:'u_' + demo.role,
-        role: demo.role,
-        email,
-        name: demo.name,
-        company: demo.company || null,
-        tier: demo.tier,
-        verified: demo.verified,
-        verificationStatus: demo.verificationStatus,
-        onboarded: demo.onboarded,
-        joined: demo.joined
-      };
-      save();
-      go('dashboard');
-      toast(`Welcome back, ${demo.name.split(' ')[0]}! Signed in as ${demo.role === 'influencer' ? 'Influencer' : 'Brand'}.`, 'success', 3800);
-      return;
-    }
-    // Non-demo email — allow any valid email with a 4+ char password for testing
-    if (pw.length < 4){
-      state.authError = 'Incorrect email or password.';
-      return renderAuth();
-    }
-    state.user = {
-      id:'u_me', role: state.role, email,
-      name: state.role === 'influencer' ? 'Ava Chen' : 'Jordan Blake',
-      tier: state.role === 'influencer' ? 'creator' : 'marketing',
-      verified: true, verificationStatus:'approved', onboarded:true, joined:'2026-07-15'
-    };
-    save(); go('dashboard');
-    toast('Welcome back, ' + state.user.name.split(' ')[0] + '!', 'success');
-    return;
-  }
-
-  /* ---------- SIGNUP MODE ---------- */
   const domain = email.split('@')[1] || '';
   if (state.role === 'brand' && FREE_EMAIL_DOMAINS.includes(domain)){
     state.authError = 'Please sign up with a corporate email (e.g., company.com). Consumer emails are not eligible.';
     return renderAuth();
   }
-  const chk = pwChecks(pw);
-  if (!Object.values(chk).every(Boolean)){
-    state.authError = 'Password must be 8+ characters and include an uppercase letter, a number, and a special character.';
-    return renderAuth();
+  if (state.authMode === 'signup'){
+    const chk = pwChecks(pw);
+    if (!Object.values(chk).every(Boolean)){
+      state.authError = 'Password must be 8+ characters and include an uppercase letter, a number, and a special character.';
+      return renderAuth();
+    }
+    state.authForm.company = domain;
+    state.authMode = 'otp';
+    state.otpError = '';
+    renderAuth();
+    toast('Verification code sent to <b>' + esc(email) + '</b>', 'success');
+  } else {
+    if (pw.length < 4){ state.authError = 'Incorrect email or password.'; return renderAuth(); }
+    // demo login
+    state.user = {
+      id:'u_me', role: state.role, email,
+      name: state.role === 'influencer' ? 'Ava Chen' : 'Jordan Blake',
+      tier: state.role === 'influencer' ? 'creator' : 'marketing',
+      verified: true, onboarded:true, joined:'2026-07-15'
+    };
+    save(); go('dashboard');
+    toast('Welcome back, ' + state.user.name.split(' ')[0] + '!', 'success');
   }
-  state.authForm.company = domain;
-  state.authMode = 'otp';
-  state.otpError = '';
-  renderAuth();
-  toast('Verification code sent to <b>' + esc(email) + '</b>', 'success');
 }
 
 function handleOtpVerify(){
@@ -886,7 +784,6 @@ function handleOtpVerify(){
     name: state.role === 'influencer' ? 'Ava Chen' : 'Jordan Blake',
     tier:'free',
     verified: false,
-    verificationStatus: 'unverified',
     onboarded:false,
     joined: new Date().toISOString().slice(0,10)
   };
@@ -1049,6 +946,7 @@ function onboardNext(){
     state.onboardStep++;
     return renderOnboarding();
   }
+  // finish
   state.user.onboarded = true;
   state.user.name = isInf ? (o.fullName || 'Ava Chen') : (o.company || 'Brand Team');
   state.user.tier = 'free';
@@ -1119,10 +1017,8 @@ function renderApp(){
 function renderSidebar(){
   const u = state.user;
   const tierName = (TIERS[u.role].find(t=>t.id===u.tier)||{name:'Free'}).name;
-  const isDemo = DEMO_ACCOUNTS[(u.email||'').toLowerCase()];
   $('#sidebar').innerHTML = `
     <div class="logo"><div class="logo-mark">◆</div> Collabry</div>
-    ${isDemo ? `<div class="badge badge-info" style="margin:0 8px 12px;justify-content:center">🔑 Demo account</div>` : ''}
     ${NAV_MAIN.map(n=>`
       <button class="nav-item ${state.view===n.id?'active':''}" data-action="nav" data-view="${n.id}">
         <span class="ico">${n.icon}</span>${n.label}
@@ -1152,11 +1048,9 @@ function renderTopbar(){
   const unread = state.notifs.filter(n=>n.unread).length;
   const u = state.user;
   const initials = (u.name||'U').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-  const isDemo = DEMO_ACCOUNTS[(u.email||'').toLowerCase()];
   $('#topbar').innerHTML = `
     <button class="icon-btn" style="display:none" id="backBtn">←</button>
     <h2 class="grow truncate">${TITLES[state.view] || 'Collabry'}</h2>
-    ${isDemo ? `<span class="badge badge-info nowrap">🔑 Demo</span>` : ''}
     <button class="icon-btn" data-action="notif-open" style="position:relative">
       🔔 ${unread?`<span style="position:absolute;top:2px;right:2px;width:8px;height:8px;background:var(--danger);border-radius:50%"></span>`:''}
     </button>
@@ -1169,7 +1063,6 @@ function renderTopbar(){
         <div style="padding:8px 10px">
           <div class="bold small truncate">${esc(u.name)}</div>
           <div class="tiny muted truncate">${esc(u.email)}</div>
-          ${isDemo ? `<div class="badge badge-info mt8">🔑 Demo account</div>` : ''}
         </div>
         <div class="divider" style="margin:6px 0"></div>
         ${NAV_MORE.map(n=>`<button class="nav-item" data-action="nav" data-view="${n.id}"><span class="ico">${n.icon}</span>${n.label}</button>`).join('')}
@@ -1200,6 +1093,7 @@ function renderContent(){
   };
   $('#content').innerHTML = `<div class="content-inner">${(map[v] || viewDashboard)()}</div>`;
   if (v === 'messages') mountMessages();
+  if (v === 'discover') mountDiscover();
 }
 
 /* ============================================================
@@ -1430,6 +1324,7 @@ function viewDiscover(){
   return state.user.role === 'influencer' ? discoverCampaigns() : discoverInfluencers();
 }
 
+/* ---------- Influencer: browse campaigns ---------- */
 function discoverCampaigns(){
   const f = state.filters;
   let list = state.campaigns.slice();
@@ -1512,6 +1407,7 @@ function campaignCard(c, full = false){
     </div>`;
 }
 
+/* ---------- Brand: search influencers ---------- */
 function discoverInfluencers(){
   const f = state.filters;
   let list = state.influencers.slice();
@@ -2394,17 +2290,6 @@ const ACTIONS = {
   'auth-submit'(){ handleAuthSubmit(); },
   'otp-verify'(){ handleOtpVerify(); },
   'otp-resend'(){ toast('New code sent. (Demo code: 123456)', 'success'); },
-  'fill-demo'(el){
-    const email = el.dataset.email;
-    const demo = DEMO_ACCOUNTS[email];
-    if (!demo) return;
-    state.authForm.email = email;
-    state.authForm.password = demo.password;
-    state.role = demo.role;
-    state.authError = '';
-    renderAuth();
-    toast(`Filled ${email} — click "Sign in"`, 'success', 2500);
-  },
   'social-auth'(el){ toast('Simulated ' + el.dataset.p + ' sign-in…', ''); setTimeout(()=>{ state.authForm.email='demo@company.com'; state.authMode='signup'; toast('Use email sign-up in this demo','warn'); }, 700); },
 
   /* ---- onboarding ---- */
@@ -2427,8 +2312,7 @@ const ACTIONS = {
   'logout'(){
     state.user = null;
     localStorage.removeItem(STORAGE_KEY);
-    state.authMode = 'login';
-    state.authForm = {email:'', password:'', company:''};
+    state.authMode = 'signup';
     state.onboardStep = 0;
     renderAuth();
     toast('Signed out');
@@ -3090,11 +2974,11 @@ function openInfluencerProfile(id){
   if (!i) return;
   const sel = state.selectedInfluencers.includes(id);
   openModal({
-   button title: esc(i.name),
-    class size:'lg',
+    title: esc(i.name),
+    size:'lg',
     body:`
-      <div=" class="row" style="gap:14pxbtn;align-items:flex-start">
-        <div class="avatar lg">${esc(i.name.split ${(' ').map(w=>w[0]).join(''))}</div>
+      <div class="row" style="gap:14px;align-items:flex-start">
+        <div class="avatar lg">${esc(i.name.split(' ').map(w=>w[0]).join(''))}</div>
         <div class="grow">
           <div class="row" style="gap:8px">
             <b>${esc(i.handle)}</b>
@@ -3133,7 +3017,7 @@ function openInfluencerProfile(id){
       <div class="row between small mb8"><span class="muted">TikTok Video</span><b>${money(Math.round(i.rate*0.9))}</b></div>
       <div class="row between small"><span class="muted">Story (24h)</span><b>${money(Math.round(i.rate*0.6))}</b></div>`,
     footer:`<button class="btn btn-outline" data-close>Close</button>
-            <sel?'btn-outline':'btn-primary'}" data-action="toggle-select-from-modal" data-id="${id}" data-close>${sel?'Remove from list':'Add to list'}</button>
+            <button class="btn ${sel?'btn-outline':'btn-primary'}" data-action="toggle-select-from-modal" data-id="${id}" data-close>${sel?'Remove from list':'Add to list'}</button>
             <button class="btn btn-primary" data-action="quick-invite" data-id="${id}" data-close>Invite to campaign</button>`
   });
 }
@@ -3223,6 +3107,7 @@ function downloadFile(name, content, type){
   setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 500);
 }
 
+/* extra actions registered after helpers are defined */
 ACTIONS['toggle-select-from-modal'] = function(el){
   const id = el.dataset.id;
   const i = state.selectedInfluencers.indexOf(id);
@@ -3243,6 +3128,7 @@ ACTIONS['publish-campaign'] = function(){
   save(); renderApp();
   toast('🚀 Campaign published — now visible to matching influencers', 'success', 4000);
 };
+ACTIONS['mark-read'] = ACTIONS['mark-read'];
 
 /* ============================================================
    19. GLOBAL EVENT DELEGATION
@@ -3257,6 +3143,7 @@ document.addEventListener('click', e => {
   fn(el, e);
 });
 
+/* close user menu on outside click */
 document.addEventListener('click', e => {
   const menu = $('#userMenu');
   if (!menu || menu.classList.contains('hidden')) return;
@@ -3273,8 +3160,6 @@ document.addEventListener('click', e => {
   document.documentElement.setAttribute('data-theme', state.theme || 'light');
 
   if (!state.user){
-    // Default to login screen so demo credentials are immediately visible
-    state.authMode = state.authMode || 'login';
     renderAuth();
   } else if (!state.user.onboarded){
     renderOnboarding();
@@ -3282,6 +3167,7 @@ document.addEventListener('click', e => {
     renderApp();
   }
 
+  // FAB for quick demo access (desktop)
   if (!/Android|iPhone|iPad/i.test(navigator.userAgent)){
     const fab = document.createElement('button');
     fab.className = 'fab';
