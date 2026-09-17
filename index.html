@@ -1,1 +1,3183 @@
 
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Collabry — Influencer &amp; Brand Marketplace (Prototype)</title>
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root{
+  --bg:#f4f5fa; --surface:#fff; --surface-2:#f7f8fc; --surface-3:#eceef7;
+  --text:#141622; --muted:#6c7285; --border:#e6e8f2;
+  --primary:#5b4bff; --primary-2:#4436e6; --primary-soft:#eeecff;
+  --success:#0e9f6e; --success-soft:#e6f7f1;
+  --warn:#c2760a; --warn-soft:#fdf2e0;
+  --danger:#dc2626; --danger-soft:#fdeaea;
+  --info:#0284c7; --info-soft:#e4f3fd;
+  --r:14px; --r-sm:10px; --r-xs:8px;
+  --sh:0 6px 24px rgba(20,22,34,.07);
+  --sh-lg:0 24px 70px rgba(20,22,34,.22);
+  --sidebar-w:250px;
+}
+[data-theme="dark"]{
+  --bg:#0d0f16; --surface:#151824; --surface-2:#1b1f2e; --surface-3:#242a3c;
+  --text:#eef0f7; --muted:#98a0b8; --border:#272d40;
+  --primary:#7c6bff; --primary-2:#6a58ff; --primary-soft:#241f4d;
+  --success:#34d399; --success-soft:#0f2f28;
+  --warn:#fbbf24; --warn-soft:#382a0d;
+  --danger:#f87171; --danger-soft:#3a1618;
+  --info:#38bdf8; --info-soft:#0c2b3d;
+  --sh:0 6px 24px rgba(0,0,0,.4);
+  --sh-lg:0 24px 70px rgba(0,0,0,.6);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--text);font-size:15px;line-height:1.45;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;
+}
+h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.01em}
+h1{font-size:22px} h2{font-size:18px} h3{font-size:16px} h4{font-size:14px}
+p{margin:0}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+.hidden{display:none !important}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.tiny{font-size:11.5px}
+.bold{font-weight:700}
+.center{text-align:center}
+.row{display:flex;align-items:center;gap:10px}
+.row.wrap{flex-wrap:wrap}
+.between{justify-content:space-between}
+.col{display:flex;flex-direction:column;gap:10px}
+.grow{flex:1;min-width:0}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt24{margin-top:24px}
+.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}
+.nowrap{white-space:nowrap}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pointer{cursor:pointer}
+
+/* ============================================================
+   PRIMITIVES
+   ============================================================ */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--sh)}
+.card.flat{box-shadow:none}
+.card.pad0{padding:0;overflow:hidden}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  border:1px solid transparent;background:var(--surface-3);color:var(--text);
+  padding:10px 15px;border-radius:var(--r-sm);font-size:14px;font-weight:650;
+  cursor:pointer;transition:.15s;white-space:nowrap;
+}
+.btn:hover{filter:brightness(.96)}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-2);filter:none}
+.btn-outline{background:transparent;border-color:var(--border)}
+.btn-outline:hover{background:var(--surface-2);filter:none}
+.btn-ghost{background:transparent;color:var(--muted)}
+.btn-ghost:hover{background:var(--surface-2);color:var(--text);filter:none}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger-soft{background:var(--danger-soft);color:var(--danger)}
+.btn-sm{padding:7px 11px;font-size:12.5px;border-radius:var(--r-xs)}
+.btn-lg{padding:13px 22px;font-size:15px}
+.btn-block{width:100%}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.icon-btn{
+  width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:50%;border:1px solid transparent;background:transparent;cursor:pointer;font-size:17px;
+}
+.icon-btn:hover{background:var(--surface-3)}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:11.5px;font-weight:700;background:var(--surface-3);color:var(--muted);white-space:nowrap}
+.badge-primary{background:var(--primary-soft);color:var(--primary)}
+.badge-success{background:var(--success-soft);color:var(--success)}
+.badge-warn{background:var(--warn-soft);color:var(--warn)}
+.badge-danger{background:var(--danger-soft);color:var(--danger)}
+.badge-info{background:var(--info-soft);color:var(--info)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface);font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--primary);color:var(--primary)}
+.chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.input,.select,.textarea{
+  width:100%;padding:11px 13px;border-radius:var(--r-sm);border:1px solid var(--border);
+  background:var(--surface-2);color:var(--text);outline:none;transition:.15s;font-size:14.5px;
+}
+.input:focus,.select:focus,.textarea:focus{border-color:var(--primary);background:var(--surface);box-shadow:0 0 0 3px var(--primary-soft)}
+.textarea{min-height:90px;resize:vertical}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.02em;text-transform:uppercase}
+.err{color:var(--danger);font-size:12.5px;font-weight:600}
+.help{color:var(--muted);font-size:12px}
+.avatar{
+  width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--primary),#a06bff);color:#fff;font-weight:800;font-size:14px;flex:none;
+}
+.avatar.lg{width:64px;height:64px;font-size:20px}
+.avatar.sm{width:32px;height:32px;font-size:12px}
+.divider{height:1px;background:var(--border);margin:14px 0}
+.progress{height:8px;border-radius:99px;background:var(--surface-3);overflow:hidden}
+.progress > i{display:block;height:100%;background:var(--primary);border-radius:99px;transition:width .5s}
+.bar-track{height:8px;border-radius:99px;background:var(--surface-3);overflow:hidden;flex:1}
+.bar-track > i{display:block;height:100%;background:var(--primary);border-radius:99px}
+.switch{position:relative;width:44px;height:26px;border-radius:99px;background:var(--surface-3);cursor:pointer;transition:.2s;flex:none;border:1px solid var(--border)}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:.2s}
+.switch.on{background:var(--primary);border-color:var(--primary)}
+.switch.on::after{transform:translateX(18px)}
+.checkbox{width:20px;height:20px;border-radius:6px;border:2px solid var(--border);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;background:var(--surface);font-size:12px;color:#fff}
+.checkbox.on{background:var(--primary);border-color:var(--primary)}
+
+/* ============================================================
+   LAYOUT SHELL
+   ============================================================ */
+.app-shell{display:flex;height:100vh;overflow:hidden}
+.sidebar{
+  width:var(--sidebar-w);flex:none;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:16px 12px;gap:4px;overflow-y:auto;
+}
+.logo{display:flex;align-items:center;gap:10px;padding:6px 8px 16px;font-weight:800;font-size:17px;letter-spacing:-.02em}
+.logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--primary),#b06bff);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;flex:none}
+.nav-item{
+  display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--r-sm);
+  color:var(--muted);font-weight:600;font-size:14px;cursor:pointer;border:none;background:transparent;width:100%;text-align:left;transition:.13s;
+}
+.nav-item:hover{background:var(--surface-2);color:var(--text)}
+.nav-item.active{background:var(--primary-soft);color:var(--primary)}
+.nav-item .ico{width:20px;text-align:center;font-size:16px}
+.nav-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:16px 12px 6px}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh}
+.topbar{
+  height:60px;flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;
+  background:var(--surface);border-bottom:1px solid var(--border);position:relative;z-index:20;
+}
+.content{flex:1;overflow-y:auto;padding:20px;-webkit-overflow-scrolling:touch}
+.content-inner{max-width:1180px;margin:0 auto}
+.bottomnav{display:none}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+
+/* ============================================================
+   AUTH
+   ============================================================ */
+.auth-shell{display:flex;min-height:100vh}
+.auth-aside{
+  flex:1;background:linear-gradient(150deg,#5b4bff,#8b5cf6 45%,#ec4899);color:#fff;
+  padding:48px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;
+}
+.auth-aside::after{content:"";position:absolute;width:520px;height:520px;border-radius:50%;background:rgba(255,255,255,.09);bottom:-220px;right:-160px}
+.auth-aside h1{font-size:36px;line-height:1.15;max-width:420px}
+.auth-main{width:520px;flex:none;display:flex;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto}
+.auth-card{width:100%;max-width:420px}
+.seg{display:flex;background:var(--surface-3);border-radius:var(--r-sm);padding:4px;gap:4px;margin-bottom:20px}
+.seg-btn{flex:1;padding:10px;border:none;background:transparent;border-radius:8px;font-weight:700;font-size:13.5px;cursor:pointer;color:var(--muted);transition:.15s}
+.seg-btn.active{background:var(--surface);color:var(--primary);box-shadow:var(--sh)}
+.otp-row{display:flex;gap:8px;justify-content:space-between}
+.otp-row input{
+  width:100%;aspect-ratio:1/1.15;text-align:center;font-size:22px;font-weight:800;
+  border-radius:12px;border:1.5px solid var(--border);background:var(--surface-2);outline:none;
+}
+.otp-row input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.strength{display:flex;gap:4px;margin-top:6px}
+.strength i{flex:1;height:4px;border-radius:99px;background:var(--surface-3)}
+.strength i.ok{background:var(--success)}
+.strength i.mid{background:var(--warn)}
+.strength i.bad{background:var(--danger)}
+.steps{display:flex;gap:6px;margin-bottom:22px}
+.steps i{flex:1;height:5px;border-radius:99px;background:var(--surface-3)}
+.steps i.done{background:var(--primary)}
+
+/* ============================================================
+   COMPONENTS
+   ============================================================ */
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.stat .v{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-top:4px}
+.stat .k{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.list-item{display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);align-items:flex-start;transition:.13s}
+.list-item:last-child{border-bottom:none}
+.list-item:hover{background:var(--surface-2)}
+.list-item.selected{background:var(--primary-soft)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:10px 14px;border:none;background:transparent;font-weight:700;font-size:13.5px;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.empty{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty .big{font-size:40px;margin-bottom:12px}
+table.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+table.tbl th{text-align:left;padding:10px 14px;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:800}
+table.tbl td{padding:12px 14px;border-bottom:1px solid var(--border)}
+table.tbl tr:last-child td{border-bottom:none}
+.banner{display:flex;gap:11px;padding:12px 14px;border-radius:var(--r-sm);font-size:13.5px;font-weight:600;align-items:flex-start;line-height:1.4}
+.banner-warn{background:var(--warn-soft);color:var(--warn)}
+.banner-danger{background:var(--danger-soft);color:var(--danger)}
+.banner-info{background:var(--info-soft);color:var(--info)}
+.banner-success{background:var(--success-soft);color:var(--success)}
+
+/* Messaging */
+.thread-layout{display:grid;grid-template-columns:320px 1fr;gap:0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface);height:calc(100vh - 160px);min-height:460px}
+.thread-list{border-right:1px solid var(--border);overflow-y:auto}
+.thread-item{padding:13px 14px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:10px;align-items:center}
+.thread-item:hover{background:var(--surface-2)}
+.thread-item.active{background:var(--primary-soft)}
+.thread-pane{display:flex;flex-direction:column;min-width:0}
+.msg-scroll{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--surface-2)}
+.msg{max-width:78%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.45}
+.msg.them{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px;align-self:flex-start}
+.msg.me{background:var(--primary);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+.msg .meta{font-size:10.5px;opacity:.7;margin-top:5px;font-weight:600}
+.proposal-card{border:1.5px solid var(--primary);background:var(--surface);border-radius:var(--r);padding:14px;align-self:stretch;max-width:100%}
+.composer{border-top:1px solid var(--border);padding:12px;display:flex;gap:8px;background:var(--surface)}
+
+/* Modal / Sheet / Drawer */
+.backdrop{
+  position:fixed;inset:0;background:rgba(12,14,22,.55);backdrop-filter:blur(3px);
+  display:flex;align-items:center;justify-content:center;padding:16px;z-index:1000;
+  opacity:0;transition:opacity .18s;overflow-y:auto;
+}
+.backdrop.show{opacity:1}
+.modal{
+  background:var(--surface);border-radius:18px;width:100%;max-width:520px;box-shadow:var(--sh-lg);
+  transform:translateY(12px) scale(.98);transition:.2s;max-height:92vh;display:flex;flex-direction:column;
+}
+.backdrop.show .modal{transform:none}
+.modal.lg{max-width:760px}
+.modal.xl{max-width:980px}
+.modal.sheet{max-width:480px;align-self:flex-end}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px 12px}
+.modal-body{padding:4px 20px 20px;overflow-y:auto}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.toast-root{position:fixed;top:16px;right:16px;z-index:3000;display:flex;flex-direction:column;gap:9px;pointer-events:none;max-width:calc(100vw - 32px)}
+.toast{
+  background:var(--text);color:var(--bg);padding:12px 16px;border-radius:12px;font-size:13.5px;font-weight:600;
+  box-shadow:var(--sh-lg);animation:slideIn .22s ease;max-width:340px;pointer-events:auto;
+}
+.toast.success{background:var(--success);color:#fff}
+.toast.warn{background:var(--warn);color:#fff}
+.toast.danger{background:var(--danger);color:#fff}
+@keyframes slideIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+
+/* Demo FAB */
+.fab{
+  position:fixed;right:18px;bottom:18px;z-index:900;width:52px;height:52px;border-radius:50%;
+  background:var(--text);color:var(--bg);border:none;font-size:20px;cursor:pointer;box-shadow:var(--sh-lg);
+  display:flex;align-items:center;justify-content:center;
+}
+.offline-bar{background:var(--danger);color:#fff;padding:9px 16px;font-size:13px;font-weight:700;text-align:center}
+.chart{display:flex;align-items:flex-end;gap:7px;height:130px;padding-top:8px}
+.chart .bar{flex:1;background:linear-gradient(180deg,var(--primary),#a78bfa);border-radius:6px 6px 0 0;min-height:6px;position:relative;transition:.3s}
+.chart .bar:hover{opacity:.8}
+.chart-x{display:flex;gap:7px;margin-top:6px}
+.chart-x span{flex:1;text-align:center;font-size:10.5px;color:var(--muted);font-weight:700}
+.rate-row{display:flex;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.rate-row:last-child{border-bottom:none}
+.rate-row input{width:110px}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:1000px){
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(2,1fr)}
+  .auth-aside{display:none}
+  .auth-main{width:100%}
+}
+@media (max-width:860px){
+  .sidebar{display:none}
+  .bottomnav{
+    display:flex;height:64px;flex:none;background:var(--surface);border-top:1px solid var(--border);
+    padding-bottom:env(safe-area-inset-bottom);position:relative;z-index:20;
+  }
+  .bn-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    border:none;background:transparent;color:var(--muted);font-size:10.5px;font-weight:700;cursor:pointer;padding:6px 2px;
+  }
+  .bn-item .ico{font-size:19px}
+  .bn-item.active{color:var(--primary)}
+  .content{padding:14px 14px 24px}
+  .thread-layout{grid-template-columns:1fr;height:calc(100vh - 190px)}
+  .thread-layout.show-pane .thread-list{display:none}
+  .thread-layout:not(.show-pane) .thread-pane{display:none}
+  .fab{bottom:80px}
+  .g2,.g3,.g4{grid-template-columns:1fr}
+  .auth-main{padding:20px 16px}
+  .modal{max-width:100%}
+}
+@media (max-width:420px){
+  .otp-row input{font-size:18px;border-radius:9px}
+  .stat .v{font-size:20px}
+}
+</style>
+</head>
+<body>
+
+<div id="toastRoot" class="toast-root"></div>
+<div id="modalRoot"></div>
+<div id="offlineBar" class="offline-bar hidden">⚠️ You're offline. Some features are limited. Changes will sync when reconnected.</div>
+
+<!-- ============ AUTH SHELL ============ -->
+<div id="authShell" class="auth-shell">
+  <div class="auth-aside">
+    <div class="logo" style="color:#fff;padding-left:0">
+      <div class="logo-mark" style="background:rgba(255,255,255,.22)">◆</div> Collabry
+    </div>
+    <div>
+      <h1>Where creators and brands build partnerships that pay.</h1>
+      <p style="margin-top:16px;opacity:.9;max-width:400px;font-size:15px">
+        Discover, negotiate, and manage sponsored content collaborations — with verified metrics,
+        in-app contracts, and escrow-protected payments.
+      </p>
+      <div class="row wrap mt24" style="gap:22px;opacity:.92;font-size:13px;font-weight:700">
+        <span>✓ 500K+ creators</span><span>✓ 50K+ brands</span><span>✓ 35% match rate</span>
+      </div>
+    </div>
+    <p class="tiny" style="opacity:.75">Prototype build · Dummy data · No real transactions</p>
+  </div>
+  <div class="auth-main"><div class="auth-card" id="authMain"></div></div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="appShell" class="app-shell hidden">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="content" id="content"></main>
+    <nav class="bottomnav" id="bottomnav"></nav>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   0. UTILITIES
+   ============================================================ */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const uid = p => p + Math.random().toString(36).slice(2, 8);
+const fmtN = n => n >= 1e6 ? (n/1e6).toFixed(n % 1e6 === 0 ? 0 : 1) + 'M'
+              : n >= 1e3 ? (n/1e3).toFixed(n % 1e3 === 0 ? 0 : 1) + 'K' : String(n);
+const money = n => '$' + Number(n).toLocaleString('en-US');
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+
+const CURRENCIES = {
+  USD:{sym:'$', rate:1,   ppp:1,    label:'US Dollar'},
+  EUR:{sym:'€', rate:0.92,ppp:1,    label:'Euro'},
+  GBP:{sym:'£', rate:0.79,ppp:1,    label:'British Pound'},
+  BRL:{sym:'R$',rate:5.05,ppp:0.72, label:'Brazilian Real'},
+  INR:{sym:'₹', rate:83.2,ppp:0.62, label:'Indian Rupee'},
+  JPY:{sym:'¥', rate:152, ppp:1,    label:'Japanese Yen'},
+  AUD:{sym:'A$',rate:1.52,ppp:1,    label:'Australian Dollar'},
+  CAD:{sym:'C$',rate:1.36,ppp:1,    label:'Canadian Dollar'}
+};
+function price(usd){
+  const c = CURRENCIES[state.currency] || CURRENCIES.USD;
+  const v = usd * c.rate * c.ppp;
+  const dec = (c.rate > 20 || usd % 1 === 0) ? 0 : 2;
+  return c.sym + v.toLocaleString('en-US',{minimumFractionDigits:dec, maximumFractionDigits:dec});
+}
+function priceApprox(usd){
+  const c = CURRENCIES[state.currency] || CURRENCIES.USD;
+  if (c.rate === 1) return '';
+  return ` (≈ ${money(usd)} USD, updated today)`;
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ============================================================
+   1. SEED DATA
+   ============================================================ */
+const NICHES = ['Fitness','Beauty','Tech','Food','Travel','Fashion','Gaming','Finance','Parenting','Sustainability'];
+
+const SEED_INFLUENCERS = [
+  {id:'i1', name:'Ava Chen',      handle:'@avacreates',   niches:['Beauty','Fashion'],  followers:184000, er:4.2, loc:'US', age:'18-24', verified:true,  rate:1800, rating:4.8, collabs:34, bio:'Clean beauty + skincare routines for Gen Z.', audience:{'18-24':46,'25-34':34,'35-44':14,'45-54':4,'55+':2}, gender:{f:72,m:25,o:3}},
+  {id:'i2', name:'Marcus Reid',   handle:'@marcuslifts',   niches:['Fitness'],           followers:512000, er:2.8, loc:'US', age:'25-34', verified:true,  rate:4200, rating:4.9, collabs:61, bio:'Strength training & nutrition coaching.', audience:{'18-24':28,'25-34':41,'35-44':21,'45-54':8,'55+':2}, gender:{f:38,m:59,o:3}},
+  {id:'i3', name:'Sofia Alvarez', handle:'@sofiaeats',     niches:['Food','Travel'],     followers:96000,  er:5.9, loc:'ES', age:'25-34', verified:false, rate:950,  rating:4.6, collabs:18, bio:'Mediterranean recipes & city food guides.', audience:{'18-24':22,'25-34':44,'35-44':24,'45-54':8,'55+':2}, gender:{f:64,m:33,o:3}},
+  {id:'i4', name:'Devon Wright',  handle:'@devontech',     niches:['Tech'],              followers:1240000,er:1.9, loc:'US', age:'25-34', verified:true,  rate:11000,rating:4.7, collabs:88, bio:'Consumer tech reviews, unboxings, and dev tools.', audience:{'18-24':31,'25-34':39,'35-44':20,'45-54':8,'55+':2}, gender:{f:24,m:73,o:3}},
+  {id:'i5', name:'Priya Nair',    handle:'@priyafit',      niches:['Fitness','Sustainability'], followers:42000, er:7.4, loc:'IN', age:'18-24', verified:false, rate:380, rating:4.5, collabs:9,  bio:'Home workouts & sustainable living on a budget.', audience:{'18-24':58,'25-34':30,'35-44':9,'45-54':2,'55+':1}, gender:{f:57,m:40,o:3}},
+  {id:'i6', name:'Liam O\'Connor',handle:'@liamplays',     niches:['Gaming'],            followers:780000, er:3.3, loc:'IE', age:'18-24', verified:true,  rate:6500, rating:4.8, collabs:47, bio:'FPS gameplay, esports commentary, hardware.', audience:{'18-24':54,'25-34':31,'35-44':11,'45-54':3,'55+':1}, gender:{f:19,m:78,o:3}},
+  {id:'i7', name:'Nadia Hassan',  handle:'@nadiawears',    niches:['Fashion','Beauty'],  followers:288000, er:3.9, loc:'AE', age:'25-34', verified:true,  rate:2400, rating:4.7, collabs:40, bio:'Modest fashion & luxury styling.', audience:{'18-24':36,'25-34':40,'35-44':18,'45-54':5,'55+':1}, gender:{f:81,m:16,o:3}},
+  {id:'i8', name:'Tom Bakker',    handle:'@tombakes',      niches:['Food'],              followers:15800,  er:8.9, loc:'NL', age:'35-44', verified:false, rate:220, rating:4.4, collabs:5,  bio:'Sourdough, pastries and slow baking.', audience:{'18-24':12,'25-34':28,'35-44':34,'45-54':19,'55+':7}, gender:{f:61,m:36,o:3}},
+  {id:'i9', name:'Chloe Bennett', handle:'@chloemoves',    niches:['Fitness','Parenting'],followers:64000, er:6.1, loc:'CA', age:'25-34', verified:true,  rate:640, rating:4.6, collabs:14, bio:'Postpartum fitness and wellness for parents.', audience:{'18-24':14,'25-34':46,'35-44':30,'45-54':8,'55+':2}, gender:{f:88,m:9,o:3}},
+  {id:'i10',name:'Kai Tanaka',    handle:'@kaitravels',    niches:['Travel','Tech'],     followers:340000, er:2.6, loc:'JP', age:'25-34', verified:true,  rate:3100, rating:4.5, collabs:52, bio:'Slow travel in Asia + camera gear reviews.', audience:{'18-24':27,'25-34':42,'35-44':22,'45-54':7,'55+':2}, gender:{f:44,m:53,o:3}}
+];
+
+const SEED_CAMPAIGNS = [
+  {id:'c1', brand:'Lumen Skincare', domain:'lumenskin.com', verified:true, title:'Summer Glow Serum Launch', category:'Beauty', niche:'Beauty', budget:45000, rate:'$1.5K – $4K', deliverables:['2 Instagram Posts','1 TikTok Video'], deadline:'2026-10-15', match:94, applicants:38, description:'Launch campaign for our new Vitamin C glow serum. Looking for authentic skincare creators with engaged audiences.', saved:false},
+  {id:'c2', brand:'PulseFit Gear', domain:'pulsefit.com', verified:true, title:'Q4 Fitness Apparel Push', category:'Fitness', niche:'Fitness', budget:80000, rate:'$800 – $6K', deliverables:['1 Reel','2 Stories','1 TikTok'], deadline:'2026-11-01', match:88, applicants:112, description:'Performance wear drop. We want creators who actually train and can show product in real workouts.', saved:true},
+  {id:'c3', brand:'Northwind Coffee', domain:'northwind.coffee', verified:true, title:'Cold Brew Season Awareness', category:'Food', niche:'Food', budget:20000, rate:'$400 – $2K', deliverables:['1 Instagram Post','1 Story'], deadline:'2026-10-05', match:76, applicants:23, description:'Seasonal cold brew blend. Lifestyle-forward content, morning routines, café aesthetics.', saved:false},
+  {id:'c4', brand:'Nova Devices', domain:'novadevices.com', verified:false, title:'Wireless Earbuds Review Program', category:'Tech', niche:'Tech', budget:120000, rate:'$3K – $12K', deliverables:['1 YouTube Video','1 TikTok'], deadline:'2026-12-01', match:71, applicants:64, description:'Honest long-form reviews of our flagship ANC earbuds. Deep-dive technical creators preferred.', saved:false},
+  {id:'c5', brand:'Verde Home', domain:'verdehome.com', verified:true, title:'Sustainable Home Essentials', category:'Sustainability', niche:'Sustainability', budget:35000, rate:'$300 – $2.5K', deliverables:['1 Instagram Post','2 Stories'], deadline:'2026-10-28', match:83, applicants:41, description:'Plastic-free home goods. We prioritize creators with genuine sustainability values.', saved:false},
+  {id:'c6', brand:'Orbit Gaming', domain:'orbitgaming.gg', verified:true, title:'Tournament Season Kickoff', category:'Gaming', niche:'Gaming', budget:200000, rate:'$2K – $9K', deliverables:['2 TikTok Videos','1 YouTube Short'], deadline:'2026-11-20', match:69, applicants:87, description:'Esports tournament hype content. Fast-paced, high-energy creators only.', saved:false}
+];
+
+const SEED_COLLABS = [
+  {id:'col1', campaign:'Summer Glow Serum Launch', brand:'Lumen Skincare', influencer:'Ava Chen', counterpart:'Lumen Skincare', status:'negotiating', rate:2600, deliverables:['2 Instagram Posts','1 TikTok Video'], payment:'pending', due:'2026-10-15', progress:35, created:'2026-09-12'},
+  {id:'col2', campaign:'Q4 Fitness Apparel Push', brand:'PulseFit Gear', influencer:'Ava Chen', counterpart:'PulseFit Gear', status:'in_progress', rate:4200, deliverables:['1 Reel','2 Stories','1 TikTok'], payment:'escrowed', due:'2026-11-01', progress:72, created:'2026-09-02'},
+  {id:'col3', campaign:'Cold Brew Season Awareness', brand:'Northwind Coffee', influencer:'Ava Chen', counterpart:'Northwind Coffee', status:'completed', rate:1400, deliverables:['1 Instagram Post','1 Story'], payment:'released', due:'2026-09-05', progress:100, created:'2026-08-14'},
+  {id:'col4', campaign:'Sustainable Home Essentials', brand:'Verde Home', influencer:'Ava Chen', counterpart:'Verde Home', status:'initiated', rate:1100, deliverables:['1 Instagram Post','2 Stories'], payment:'pending', due:'2026-10-28', progress:5, created:'2026-09-20'}
+];
+
+const SEED_THREADS = [
+  {id:'t1', name:'Lumen Skincare', role:'brand', collabId:'col1', unread:2, avatar:'LS',
+   messages:[
+     {from:'them', type:'text', text:'Hi Ava! We loved your clean-beauty series. Would you be open to a collab for our Summer Glow launch?', at:'09:12'},
+     {from:'them', type:'proposal', text:'Proposal — 2 Instagram posts + 1 TikTok video', at:'09:13',
+      data:{rate:3000, deliverables:['2 Instagram Posts','1 TikTok Video'], terms:'100% on delivery'}},
+     {from:'me', type:'text', text:'Thanks! Happy to discuss. My audience skews 18–24 and converts well on skincare.', at:'09:31'},
+     {from:'me', type:'counter', text:'Counter-proposal', at:'09:40',
+      data:{rate:5000, deliverables:['3 Instagram Posts','1 TikTok Video'], terms:'50% upfront, 50% on delivery'}}
+   ]},
+  {id:'t2', name:'PulseFit Gear', role:'brand', collabId:'col2', unread:0, avatar:'PG',
+   messages:[
+     {from:'them', type:'text', text:'Contract is signed on our side — escrow funded. You can start shooting whenever ready!', at:'Yesterday'},
+     {from:'me', type:'text', text:'Perfect. Filming Thursday, first cut to you by Monday.', at:'Yesterday'}
+   ]},
+  {id:'t3', name:'Verde Home', role:'brand', collabId:'col4', unread:0, avatar:'VH',
+   messages:[
+     {from:'them', type:'text', text:'Quick question — would you be open to a 2-story bundle instead of 1 post + 2 stories?', at:'Mon'}
+   ]}
+];
+
+const SEED_NOTIFS = [
+  {id:'n1', icon:'🤝', title:'New collaboration request', body:'Orbit Gaming invited you to "Tournament Season Kickoff"', at:'12m ago', unread:true},
+  {id:'n2', icon:'💬', title:'Counter-offer received', body:'Lumen Skincare responded to your counter-proposal', at:'1h ago', unread:true},
+  {id:'n3', icon:'📈', title:'Metrics synced', body:'Instagram metrics updated — 184,210 followers', at:'2h ago', unread:false},
+  {id:'n4', icon:'💎', title:'Subscription renewal', body:'Creator plan renews on Oct 15, 2026', at:'Yesterday', unread:false}
+];
+
+const RATE_ITEMS = [
+  {id:'ig_post',  label:'Instagram Feed Post',            base:500,  max:50000},
+  {id:'ig_reel',  label:'Instagram Reel',                 base:600,  max:60000},
+  {id:'ig_story', label:'Instagram Story (24h takeover)', base:400,  max:25000},
+  {id:'tt_video', label:'TikTok Video',                   base:400,  max:40000},
+  {id:'yt_video', label:'YouTube Video (embedded)',       base:1000, max:100000},
+  {id:'tt_live',  label:'TikTok Live Shopping',           base:300,  max:20000},
+  {id:'consult',  label:'Personal Brand Consultation (hourly)', base:100, max:500}
+];
+
+function suggestedRange(followers){
+  if (followers < 10000)   return [100, 500];
+  if (followers < 100000)  return [500, 2000];
+  if (followers < 1000000) return [2000, 10000];
+  return [10000, 100000];
+}
+
+const TIERS = {
+  influencer:[
+    {id:'free',       name:'Free',       price:0,     tag:'',            features:['Profile creation','1 social link','Browse brand campaigns','Basic analytics'], limit:'View 10 brands/day • 1 outreach/week'},
+    {id:'creator',    name:'Creator',    price:9.99,  tag:'Popular',     features:['Unlimited social links','AI match recommendations','Unlimited outreach','Basic analytics'], limit:'Unlimited outreach'},
+    {id:'pro',        name:'Pro',        price:29.99, tag:'Best value',  features:['Everything in Creator','Advanced analytics','Custom rate card','Priority support'], limit:'Up to 100 active collaborations'},
+    {id:'enterprise', name:'Enterprise', price:null,  tag:'',            features:['White-label','API access','Dedicated account manager'], limit:'Unlimited'}
+  ],
+  brand:[
+    {id:'free',       name:'Free',       price:0,     tag:'',           features:['Brand profile','Search influencers','1 campaign'], limit:'Max 20 influencer outreach'},
+    {id:'marketing',  name:'Marketing',  price:49,    tag:'Popular',    features:['Unlimited campaigns','Team seats (2)','Basic analytics'], limit:'Up to 5 concurrent campaigns'},
+    {id:'agency',     name:'Agency',     price:199,   tag:'Best value', features:['Everything in Marketing','Advanced filtering','Custom workflows','10 team seats'], limit:'Up to 20 concurrent campaigns'},
+    {id:'enterprise', name:'Enterprise', price:null,  tag:'',           features:['White-label','SSO','Full API','Dedicated support'], limit:'Unlimited'}
+  ]
+};
+
+/* ============================================================
+   2. STATE
+   ============================================================ */
+const STORAGE_KEY = 'collabry_proto_v1';
+
+const state = {
+  theme:'light',
+  currency:'USD',
+  offline:false,
+  rateLimited:false,
+  staleMetrics:false,
+  user:null,
+  view:'dashboard',
+  authMode:'signup',        // signup | login | otp
+  role:'influencer',
+  authForm:{email:'', password:'', company:''},
+  otp:'',
+  otpError:'',
+  onboardStep:0,
+  onboarding:{fullName:'', dob:'', country:'US', primaryNiche:'', secondary:[], tos:false,
+              company:'', entity:'llc', industry:'', teamName:'', docUploaded:false},
+  filters:{niche:'all', maxFollowers:2000000, minFollowers:0, location:'all', minER:0, verifiedOnly:false, category:'all', sort:'match'},
+  selectedInfluencers:[],
+  activeThread:'t1',
+  collabTab:'all',
+  discoverTab:'campaigns',
+  subscriptionTab:'plans',
+  profileTab:'overview',
+  messagesPane:'list',
+  mfa:true,
+  notifPrefs:{push:true, email:true, weekly:false},
+  usage:{brandViewsToday:3, outreachThisWeek:0, activeCollabs:2},
+  billingHistory:[
+    {date:'2026-09-15', desc:'Creator — Monthly', amount:9.99, status:'Paid', id:'APL-88213094'},
+    {date:'2026-08-15', desc:'Creator — Monthly', amount:9.99, status:'Paid', id:'APL-88103422'},
+    {date:'2026-07-15', desc:'Creator — Monthly', amount:9.99, status:'Paid', id:'APL-87990211'}
+  ],
+  watchlist:['c2'],
+  toasts:[],
+  // seeded collections (mutable copies)
+  influencers: JSON.parse(JSON.stringify(SEED_INFLUENCERS)),
+  campaigns:   JSON.parse(JSON.stringify(SEED_CAMPAIGNS)),
+  collabs:     JSON.parse(JSON.stringify(SEED_COLLABS)),
+  threads:     JSON.parse(JSON.stringify(SEED_THREADS)),
+  notifs:      JSON.parse(JSON.stringify(SEED_NOTIFS)),
+  socials:{
+    instagram:{connected:true,  followers:184210, synced:'12 minutes ago', status:'connected'},
+    tiktok:   {connected:true,  followers:96400,  synced:'12 minutes ago', status:'connected'},
+    youtube:  {connected:false, followers:0,      synced:'—',              status:'disconnected'}
+  },
+  rates: Object.fromEntries(RATE_ITEMS.map(r => [r.id, {value: Math.round(r.base*1.4), on:true}])),
+  ratesPublic:true,
+  ratesNegotiable:true,
+  gracePeriod:0 // 0 = none, 1..4 = day of grace
+};
+
+/* ---------- persistence ---------- */
+function save(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      user:state.user, theme:state.theme, currency:state.currency,
+      socials:state.socials, rates:state.rates, ratesPublic:state.ratesPublic,
+      ratesNegotiable:state.ratesNegotiable, watchlist:state.watchlist,
+      campaigns:state.campaigns, collabs:state.collabs, threads:state.threads,
+      notifs:state.notifs, usage:state.usage, billingHistory:state.billingHistory,
+      mfa:state.mfa, notifPrefs:state.notifPrefs
+    }));
+  }catch(e){}
+}
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const d = JSON.parse(raw);
+    Object.assign(state, d);
+  }catch(e){}
+}
+function resetDemo(){
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+/* ============================================================
+   3. TOASTS + MODALS
+   ============================================================ */
+function toast(msg, type = '', ms = 3200){
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.innerHTML = msg;
+  $('#toastRoot').appendChild(el);
+  setTimeout(() => { el.style.transition = '.25s'; el.style.opacity = '0'; el.style.transform = 'translateX(24px)';
+    setTimeout(() => el.remove(), 260); }, ms);
+}
+
+let modalStack = [];
+function openModal({title='', body='', footer='', size='', onMount=null}){
+  const back = document.createElement('div');
+  back.className = 'backdrop';
+  back.innerHTML = `
+    <div class="modal ${size}" role="dialog" aria-modal="true">
+      ${title ? `<div class="modal-head"><h3>${title}</h3><button class="icon-btn" data-close aria-label="Close">✕</button></div>` : ''}
+      <div class="modal-body">${body}</div>
+      ${footer ? `<div class="modal-foot">${footer}</div>` : ''}
+    </div>`;
+  back.addEventListener('click', e => {
+    if (e.target === back || e.target.closest('[data-close]')) closeModal();
+  });
+  $('#modalRoot').appendChild(back);
+  requestAnimationFrame(() => back.classList.add('show'));
+  modalStack.push(back);
+  if (onMount) onMount(back);
+  return back;
+}
+function closeModal(){
+  const back = modalStack.pop();
+  if (!back) return;
+  back.classList.remove('show');
+  setTimeout(() => back.remove(), 200);
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ============================================================
+   4. AUTH
+   ============================================================ */
+const FREE_EMAIL_DOMAINS = ['gmail.com','yahoo.com','hotmail.com','outlook.com','aol.com','icloud.com','proton.me','protonmail.com','mail.com','gmx.com','live.com'];
+
+function pwChecks(pw){
+  return {
+    len: pw.length >= 8,
+    up:  /[A-Z]/.test(pw),
+    num: /[0-9]/.test(pw),
+    sp:  /[^A-Za-z0-9]/.test(pw)
+  };
+}
+
+function renderAuth(){
+  $('#appShell').classList.add('hidden');
+  $('#authShell').classList.remove('hidden');
+  const c = $('#authMain');
+
+  if (state.authMode === 'otp'){
+    c.innerHTML = `
+      <div class="logo" style="padding-left:0;margin-bottom:22px"><div class="logo-mark">◆</div> Collabry</div>
+      <h1>Verify your email</h1>
+      <p class="muted mt8">We sent a 6-digit code to <b>${esc(state.authForm.email)}</b>. It expires in 10 minutes.</p>
+      <div class="card mt16" style="background:var(--surface-2)">
+        <div class="row between small"><span class="muted">Demo code</span><b style="letter-spacing:.2em">123456</b></div>
+      </div>
+      <div class="otp-row mt16" id="otpRow">
+        ${Array.from({length:6}, (_,i)=>`<input inputmode="numeric" maxlength="1" data-i="${i}" aria-label="Digit ${i+1}">`).join('')}
+      </div>
+      ${state.otpError ? `<p class="err mt8">${esc(state.otpError)}</p>` : ''}
+      <button class="btn btn-primary btn-lg btn-block mt16" data-action="otp-verify">Verify &amp; continue</button>
+      <div class="row between mt12">
+        <button class="btn btn-ghost btn-sm" data-action="auth-back">← Back</button>
+        <button class="btn btn-ghost btn-sm" data-action="otp-resend">Resend code</button>
+      </div>`;
+    const inputs = $$('#otpRow input');
+    inputs.forEach((inp, idx) => {
+      inp.addEventListener('input', () => {
+        inp.value = inp.value.replace(/\D/g,'').slice(0,1);
+        if (inp.value && idx < 5) inputs[idx+1].focus();
+      });
+      inp.addEventListener('keydown', e => {
+        if (e.key === 'Backspace' && !inp.value && idx > 0) inputs[idx-1].focus();
+      });
+      inp.addEventListener('paste', e => {
+        const t = (e.clipboardData.getData('text')||'').replace(/\D/g,'').slice(0,6);
+        if (!t) return;
+        e.preventDefault();
+        t.split('').forEach((ch,i)=>{ if(inputs[i]) inputs[i].value = ch; });
+        inputs[Math.min(t.length,5)].focus();
+      });
+    });
+    inputs[0].focus();
+    return;
+  }
+
+  const isSignup = state.authMode === 'signup';
+  const pw = state.authForm.password;
+  const chk = pwChecks(pw);
+  const score = Object.values(chk).filter(Boolean).length;
+  const strengthLabel = !pw ? '' : score <= 2 ? 'Weak' : score === 3 ? 'Good' : 'Strong';
+  const strengthCls = score <= 2 ? 'bad' : score === 3 ? 'mid' : 'ok';
+
+  c.innerHTML = `
+    <div class="logo" style="padding-left:0;margin-bottom:22px"><div class="logo-mark">◆</div> Collabry</div>
+    <h1>${isSignup ? 'Create your account' : 'Welcome back'}</h1>
+    <p class="muted mt8">${isSignup ? 'Join the marketplace in under 2 minutes.' : 'Sign in to continue to your dashboard.'}</p>
+
+    <div class="seg mt16" id="roleSeg">
+      <button class="seg-btn ${state.role==='influencer'?'active':''}" data-action="auth-role" data-role="influencer">🎬 Influencer</button>
+      <button class="seg-btn ${state.role==='brand'?'active':''}" data-action="auth-role" data-role="brand">🏢 Brand Rep</button>
+    </div>
+
+    <div class="col" style="gap:14px">
+      <div class="field">
+        <label>${state.role === 'brand' ? 'Corporate email' : 'Email address'}</label>
+        <input class="input" id="emailInput" type="email" placeholder="${state.role==='brand'?'you@company.com':'you@example.com'}" value="${esc(state.authForm.email)}">
+        ${state.role === 'brand' ? `<span class="help">Must be a company domain — free providers aren't eligible.</span>` : ''}
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input class="input" id="pwInput" type="password" placeholder="At least 8 characters" value="${esc(pw)}">
+        ${isSignup ? `
+          <div class="strength">
+            ${[0,1,2,3].map(i=>`<i class="${i < score ? strengthCls : ''}"></i>`).join('')}
+          </div>
+          <div class="row between">
+            <span class="help">8+ chars · 1 uppercase · 1 number · 1 symbol</span>
+            <span class="help bold">${strengthLabel}</span>
+          </div>` : ''}
+      </div>
+
+      ${state.authError ? `<div class="banner banner-danger"><span>⚠️</span><span>${esc(state.authError)}</span></div>` : ''}
+
+      <button class="btn btn-primary btn-lg btn-block" data-action="auth-submit">
+        ${isSignup ? 'Create account' : 'Sign in'}
+      </button>
+
+      <div class="row" style="gap:10px">
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+        <span class="muted tiny bold">OR</span>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+      </div>
+
+      <div class="row" style="gap:10px">
+        <button class="btn btn-outline grow" data-action="social-auth" data-p="apple"> Apple</button>
+        <button class="btn btn-outline grow" data-action="social-auth" data-p="google">G Google</button>
+      </div>
+
+      <p class="center small muted">
+        ${isSignup ? 'Already have an account?' : "Don't have an account?"}
+        <button class="btn btn-ghost btn-sm" style="color:var(--primary);font-weight:800" data-action="auth-mode">
+          ${isSignup ? 'Sign in' : 'Sign up'}
+        </button>
+      </p>
+      <p class="center tiny muted">By continuing you agree to our Terms of Service &amp; Privacy Policy.</p>
+    </div>`;
+
+  $('#emailInput')?.addEventListener('input', e => { state.authForm.email = e.target.value; state.authError=''; });
+  $('#pwInput')?.addEventListener('input', e => {
+    state.authForm.password = e.target.value;
+    state.authError = '';
+    // live strength update without full re-render
+    const chk2 = pwChecks(e.target.value);
+    const s2 = Object.values(chk2).filter(Boolean).length;
+    const cls = s2 <= 2 ? 'bad' : s2 === 3 ? 'mid' : 'ok';
+    $$('.strength i').forEach((el,i)=> el.className = i < s2 ? cls : '');
+    const lbl = $('.strength')?.nextElementSibling?.querySelector('.bold');
+    if (lbl) lbl.textContent = !e.target.value ? '' : s2 <= 2 ? 'Weak' : s2 === 3 ? 'Good' : 'Strong';
+  });
+}
+
+function handleAuthSubmit(){
+  const email = (state.authForm.email || '').trim().toLowerCase();
+  const pw = state.authForm.password || '';
+  state.authError = '';
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    state.authError = 'Please enter a valid email address.';
+    return renderAuth();
+  }
+  const domain = email.split('@')[1] || '';
+  if (state.role === 'brand' && FREE_EMAIL_DOMAINS.includes(domain)){
+    state.authError = 'Please sign up with a corporate email (e.g., company.com). Consumer emails are not eligible.';
+    return renderAuth();
+  }
+  if (state.authMode === 'signup'){
+    const chk = pwChecks(pw);
+    if (!Object.values(chk).every(Boolean)){
+      state.authError = 'Password must be 8+ characters and include an uppercase letter, a number, and a special character.';
+      return renderAuth();
+    }
+    state.authForm.company = domain;
+    state.authMode = 'otp';
+    state.otpError = '';
+    renderAuth();
+    toast('Verification code sent to <b>' + esc(email) + '</b>', 'success');
+  } else {
+    if (pw.length < 4){ state.authError = 'Incorrect email or password.'; return renderAuth(); }
+    // demo login
+    state.user = {
+      id:'u_me', role: state.role, email,
+      name: state.role === 'influencer' ? 'Ava Chen' : 'Jordan Blake',
+      tier: state.role === 'influencer' ? 'creator' : 'marketing',
+      verified: true, onboarded:true, joined:'2026-07-15'
+    };
+    save(); go('dashboard');
+    toast('Welcome back, ' + state.user.name.split(' ')[0] + '!', 'success');
+  }
+}
+
+function handleOtpVerify(){
+  const code = $$('#otpRow input').map(i=>i.value).join('');
+  if (code.length < 6){ state.otpError = 'Please enter all 6 digits.'; return renderAuth(); }
+  if (code !== '123456'){ state.otpError = 'That code is incorrect. Try 123456 for this demo.'; return renderAuth(); }
+  state.otpError = '';
+  state.user = {
+    id:'u_me',
+    role: state.role,
+    email: state.authForm.email,
+    name: state.role === 'influencer' ? 'Ava Chen' : 'Jordan Blake',
+    tier:'free',
+    verified: false,
+    onboarded:false,
+    joined: new Date().toISOString().slice(0,10)
+  };
+  state.onboardStep = 0;
+  save(); go('onboarding');
+}
+
+/* ============================================================
+   5. ONBOARDING
+   ============================================================ */
+function renderOnboarding(){
+  $('#appShell').classList.add('hidden');
+  $('#authShell').classList.remove('hidden');
+
+  const isInf = state.user.role === 'influencer';
+  const total = 3;
+  const step = state.onboardStep;
+  const o = state.onboarding;
+  let body = '';
+
+  if (isInf){
+    if (step === 0){
+      body = `
+        <h1>Tell us about you</h1>
+        <p class="muted mt8 mb16">Step 1 of 3 · Basic info</p>
+        <div class="col" style="gap:14px">
+          <div class="field"><label>Full name</label>
+            <input class="input" id="obName" placeholder="Ava Chen" value="${esc(o.fullName)}"></div>
+          <div class="field"><label>Date of birth</label>
+            <input class="input" id="obDob" type="date" value="${esc(o.dob)}">
+            <span class="help">You must be 13 or older. Under-13 accounts require parental consent (COPPA).</span></div>
+          <div class="field"><label>Country of residence</label>
+            <select class="select" id="obCountry">
+              ${['US','GB','CA','AU','DE','FR','BR','IN','JP','AE','NL','IE','ES'].map(c=>`<option value="${c}" ${o.country===c?'selected':''}>${c}</option>`).join('')}
+            </select></div>
+        </div>`;
+    } else if (step === 1){
+      body = `
+        <h1>What do you create?</h1>
+        <p class="muted mt8 mb16">Step 2 of 3 · Choose a primary niche and up to 2 secondary.</p>
+        <div class="field mb16"><label>Primary niche</label>
+          <div class="row wrap">
+            ${NICHES.map(n=>`<button class="chip ${o.primaryNiche===n?'active':''}" data-action="pick-primary" data-n="${n}">${n}</button>`).join('')}
+          </div>
+        </div>
+        <div class="field"><label>Secondary niches (max 2)</label>
+          <div class="row wrap">
+            ${NICHES.filter(n=>n!==o.primaryNiche).map(n=>`<button class="chip ${o.secondary.includes(n)?'active':''}" data-action="pick-secondary" data-n="${n}">${n}</button>`).join('')}
+          </div>
+        </div>`;
+    } else {
+      body = `
+        <h1>Review &amp; agree</h1>
+        <p class="muted mt8 mb16">Step 3 of 3 · Terms</p>
+        <div class="card" style="background:var(--surface-2)">
+          <div class="row between small mb8"><span class="muted">Name</span><b>${esc(o.fullName || '—')}</b></div>
+          <div class="row between small mb8"><span class="muted">Country</span><b>${esc(o.country)}</b></div>
+          <div class="row between small mb8"><span class="muted">Primary niche</span><b>${esc(o.primaryNiche || '—')}</b></div>
+          <div class="row between small"><span class="muted">Secondary</span><b>${o.secondary.length ? esc(o.secondary.join(', ')) : '—'}</b></div>
+        </div>
+        <label class="row mt16 pointer" style="align-items:flex-start;gap:10px">
+          <span class="checkbox ${o.tos?'on':''}" data-action="toggle-tos">${o.tos?'✓':''}</span>
+          <span class="small">I agree to the <b>Terms of Service</b> and <b>Privacy Policy</b>, and consent to Collabry processing my profile and social metrics.</span>
+        </label>`;
+    }
+  } else {
+    if (step === 0){
+      body = `
+        <h1>Set up your brand</h1>
+        <p class="muted mt8 mb16">Step 1 of 3 · Company details</p>
+        <div class="col" style="gap:14px">
+          <div class="field"><label>Company name</label>
+            <input class="input" id="obCompany" placeholder="Lumen Skincare" value="${esc(o.company)}"></div>
+          <div class="field"><label>Legal entity type</label>
+            <select class="select" id="obEntity">
+              ${[['llc','LLC'],['corporation','Corporation'],['partnership','Partnership'],['sole_proprietor','Sole Proprietor']]
+                .map(([v,l])=>`<option value="${v}" ${o.entity===v?'selected':''}>${l}</option>`).join('')}
+            </select></div>
+          <div class="field"><label>Industry vertical</label>
+            <select class="select" id="obIndustry">
+              ${['Beauty','Fitness','Tech','Food & Beverage','Travel','Fashion','Gaming','Finance','Home','Other']
+                .map(v=>`<option ${o.industry===v?'selected':''}>${v}</option>`).join('')}
+            </select></div>
+          <div class="field"><label>Team name</label>
+            <input class="input" id="obTeam" placeholder="Growth Marketing" value="${esc(o.teamName)}"></div>
+        </div>`;
+    } else if (step === 1){
+      body = `
+        <h1>Verify your business</h1>
+        <p class="muted mt8 mb16">Step 2 of 3 · Trust &amp; Safety review (SLA 48 hours)</p>
+        <div class="card" style="background:var(--surface-2);border-style:dashed;text-align:center;padding:28px">
+          <div style="font-size:34px">📄</div>
+          <p class="bold mt8">${o.docUploaded ? 'business_license.pdf uploaded' : 'Upload verification document'}</p>
+          <p class="small muted">EIN certificate, business license, or incorporation certificate (PDF)</p>
+          <button class="btn ${o.docUploaded?'btn-outline':'btn-primary'} mt12" data-action="upload-doc">
+            ${o.docUploaded ? 'Replace file' : 'Choose file'}
+          </button>
+        </div>
+        ${o.docUploaded ? `<div class="banner banner-info mt12"><span>ℹ️</span><span>Your document is queued for review. You can keep using the app while we verify.</span></div>` : ''}
+        <div class="field mt16"><label>Domain detected</label>
+          <input class="input" value="${esc(state.user.email.split('@')[1] || '')}" disabled></div>`;
+    } else {
+      body = `
+        <h1>Invite your team</h1>
+        <p class="muted mt8 mb16">Step 3 of 3 · Optional — you can do this later</p>
+        <div class="col" style="gap:14px">
+          <div class="field"><label>Team member email</label>
+            <input class="input" placeholder="teammate@company.com" id="obInvite"></div>
+          <div class="field"><label>Role</label>
+            <select class="select"><option>Campaign Manager</option><option>Analyst</option><option>Admin</option></select></div>
+        </div>
+        <div class="banner banner-info mt16"><span>ℹ️</span><span>Team members with the same corporate domain are automatically linked to your organization.</span></div>`;
+    }
+  }
+
+  $('#authMain').innerHTML = `
+    <div class="logo" style="padding-left:0;margin-bottom:22px"><div class="logo-mark">◆</div> Collabry</div>
+    <div class="steps">${Array.from({length:total},(_,i)=>`<i class="${i<=step?'done':''}"></i>`).join('')}</div>
+    ${body}
+    <div class="row between mt24">
+      <button class="btn btn-ghost" data-action="onb-back" ${step===0?'style="visibility:hidden"':''}>← Back</button>
+      <button class="btn btn-primary btn-lg" data-action="onb-next">
+        ${step === total-1 ? (isInf ? 'Finish setup' : 'Enter dashboard') : 'Continue'}
+      </button>
+    </div>`;
+
+  if (isInf && step === 0){
+    $('#obName').addEventListener('input', e => o.fullName = e.target.value);
+    $('#obDob').addEventListener('input', e => o.dob = e.target.value);
+    $('#obCountry').addEventListener('change', e => o.country = e.target.value);
+  }
+  if (!isInf && step === 0){
+    $('#obCompany').addEventListener('input', e => o.company = e.target.value);
+    $('#obEntity').addEventListener('change', e => o.entity = e.target.value);
+    $('#obIndustry').addEventListener('change', e => o.industry = e.target.value);
+    $('#obTeam').addEventListener('input', e => o.teamName = e.target.value);
+  }
+}
+
+function onboardNext(){
+  const isInf = state.user.role === 'influencer';
+  const o = state.onboarding;
+
+  if (isInf && state.onboardStep === 0){
+    if (!o.fullName.trim()) return toast('Please enter your full name', 'warn');
+    if (!o.dob) return toast('Please enter your date of birth', 'warn');
+    const age = (Date.now() - new Date(o.dob).getTime()) / (365.25*24*3600*1000);
+    if (age < 13){
+      toast('Accounts for users under 13 require parental consent. Check your email.', 'warn', 5000);
+    }
+  }
+  if (isInf && state.onboardStep === 1 && !o.primaryNiche){
+    return toast('Please choose a primary niche', 'warn');
+  }
+  if (isInf && state.onboardStep === 2 && !o.tos){
+    return toast('Please accept the Terms of Service to continue', 'warn');
+  }
+
+  if (state.onboardStep < 2){
+    state.onboardStep++;
+    return renderOnboarding();
+  }
+  // finish
+  state.user.onboarded = true;
+  state.user.name = isInf ? (o.fullName || 'Ava Chen') : (o.company || 'Brand Team');
+  state.user.tier = 'free';
+  if (!isInf){
+    state.user.company = o.company || 'Your Brand';
+    state.user.verificationStatus = 'pending';
+  } else {
+    state.user.verificationStatus = 'unverified';
+  }
+  save();
+  go('dashboard');
+  toast('🎉 Welcome to Collabry! Your Free plan is active.', 'success', 4200);
+  setTimeout(() => {
+    openModal({
+      title:'✨ Unlock more with Creator',
+      body:`<p class="muted">You're on the <b>Free</b> plan: 10 brand views/day and 1 outreach per week.</p>
+        <div class="card mt16" style="background:var(--surface-2)">
+          <div class="row between"><b>Creator</b><b>${price(9.99)}/mo</b></div>
+          <ul class="small muted" style="margin:10px 0 0;padding-left:18px">
+            <li>Unlimited social links</li><li>AI match recommendations</li><li>Unlimited outreach</li><li>Basic analytics</li>
+          </ul>
+        </div>`,
+      footer:`<button class="btn btn-outline" data-close>Maybe later</button>
+              <button class="btn btn-primary" data-action="upgrade" data-tier="creator">Upgrade now</button>`
+    });
+  }, 900);
+}
+
+/* ============================================================
+   6. APP SHELL
+   ============================================================ */
+const NAV_MAIN = [
+  {id:'dashboard', label:'Home',     icon:'🏠'},
+  {id:'discover',  label:'Discover', icon:'🔍'},
+  {id:'collabs',   label:'Collabs',  icon:'🤝'},
+  {id:'messages',  label:'Messages', icon:'💬'}
+];
+const NAV_MORE = [
+  {id:'analytics',    label:'Analytics',    icon:'📊'},
+  {id:'profile',      label:'Profile',      icon:'👤'},
+  {id:'subscription', label:'Subscription', icon:'💎'},
+  {id:'settings',     label:'Settings',     icon:'⚙️'}
+];
+const ALL_NAV = [...NAV_MAIN, ...NAV_MORE];
+const TITLES = {
+  dashboard:'Home', discover:'Discover', collabs:'Collaborations', messages:'Messages',
+  analytics:'Analytics', profile:'Profile', subscription:'Subscription & Billing', settings:'Settings'
+};
+
+function go(view){
+  state.view = view;
+  if (state.user && !state.user.onboarded) return renderOnboarding();
+  if (!state.user) return renderAuth();
+  renderApp();
+  $('#content')?.scrollTo({top:0});
+}
+
+function renderApp(){
+  $('#authShell').classList.add('hidden');
+  $('#appShell').classList.remove('hidden');
+  renderSidebar();
+  renderTopbar();
+  renderBottomNav();
+  renderContent();
+  $('#offlineBar').classList.toggle('hidden', !state.offline);
+}
+
+function renderSidebar(){
+  const u = state.user;
+  const tierName = (TIERS[u.role].find(t=>t.id===u.tier)||{name:'Free'}).name;
+  $('#sidebar').innerHTML = `
+    <div class="logo"><div class="logo-mark">◆</div> Collabry</div>
+    ${NAV_MAIN.map(n=>`
+      <button class="nav-item ${state.view===n.id?'active':''}" data-action="nav" data-view="${n.id}">
+        <span class="ico">${n.icon}</span>${n.label}
+        ${n.id==='messages' ? unreadBadge() : ''}
+      </button>`).join('')}
+    <div class="nav-label">Manage</div>
+    ${NAV_MORE.map(n=>`
+      <button class="nav-item ${state.view===n.id?'active':''}" data-action="nav" data-view="${n.id}">
+        <span class="ico">${n.icon}</span>${n.label}
+      </button>`).join('')}
+    <div style="flex:1"></div>
+    <div class="card flat" style="background:var(--surface-2);padding:12px">
+      <div class="row between">
+        <span class="badge ${u.tier==='free'?'':'badge-primary'}">${tierName} plan</span>
+        ${u.tier==='free' ? `<button class="btn btn-primary btn-sm" data-action="nav" data-view="subscription">Upgrade</button>` : ''}
+      </div>
+      ${u.tier==='free' ? `<p class="tiny muted mt8">${u.role==='influencer'?'10 brand views/day · 1 outreach/week':'20 influencer outreach max'}</p>` : ''}
+    </div>
+    <button class="nav-item" data-action="logout"><span class="ico">↩︎</span>Sign out</button>`;
+}
+function unreadBadge(){
+  const n = state.threads.reduce((a,t)=>a+(t.unread||0),0);
+  return n ? `<span class="badge badge-danger" style="margin-left:auto">${n}</span>` : '';
+}
+
+function renderTopbar(){
+  const unread = state.notifs.filter(n=>n.unread).length;
+  const u = state.user;
+  const initials = (u.name||'U').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  $('#topbar').innerHTML = `
+    <button class="icon-btn" style="display:none" id="backBtn">←</button>
+    <h2 class="grow truncate">${TITLES[state.view] || 'Collabry'}</h2>
+    <button class="icon-btn" data-action="notif-open" style="position:relative">
+      🔔 ${unread?`<span style="position:absolute;top:2px;right:2px;width:8px;height:8px;background:var(--danger);border-radius:50%"></span>`:''}
+    </button>
+    <button class="icon-btn" data-action="theme-toggle" title="Toggle theme">${state.theme==='dark'?'☀️':'🌙'}</button>
+    <div style="position:relative">
+      <button class="row" data-action="menu-toggle" style="background:none;border:none;cursor:pointer;gap:8px;padding:2px">
+        <div class="avatar sm">${initials}</div>
+      </button>
+      <div id="userMenu" class="card hidden" style="position:absolute;right:0;top:44px;width:230px;padding:8px;z-index:60">
+        <div style="padding:8px 10px">
+          <div class="bold small truncate">${esc(u.name)}</div>
+          <div class="tiny muted truncate">${esc(u.email)}</div>
+        </div>
+        <div class="divider" style="margin:6px 0"></div>
+        ${NAV_MORE.map(n=>`<button class="nav-item" data-action="nav" data-view="${n.id}"><span class="ico">${n.icon}</span>${n.label}</button>`).join('')}
+        <div class="divider" style="margin:6px 0"></div>
+        <button class="nav-item" data-action="demo-open"><span class="ico">🧪</span>Demo controls</button>
+        <button class="nav-item" data-action="logout"><span class="ico">↩︎</span>Sign out</button>
+      </div>
+    </div>`;
+}
+
+function renderBottomNav(){
+  const items = [...NAV_MAIN, {id:'more', label:'More', icon:'⋯'}];
+  $('#bottomnav').innerHTML = items.map(n=>`
+    <button class="bn-item ${state.view===n.id?'active':''}" data-action="${n.id==='more'?'more-open':'nav'}" data-view="${n.id}">
+      <span class="ico">${n.icon}</span>${n.label}
+    </button>`).join('');
+}
+
+/* ============================================================
+   7. VIEW ROUTER
+   ============================================================ */
+function renderContent(){
+  const v = state.view;
+  const map = {
+    dashboard: viewDashboard, discover: viewDiscover, collabs: viewCollabs,
+    messages: viewMessages, analytics: viewAnalytics, profile: viewProfile,
+    subscription: viewSubscription, settings: viewSettings
+  };
+  $('#content').innerHTML = `<div class="content-inner">${(map[v] || viewDashboard)()}</div>`;
+  if (v === 'messages') mountMessages();
+  if (v === 'discover') mountDiscover();
+}
+
+/* ============================================================
+   8. DASHBOARD
+   ============================================================ */
+function viewDashboard(){
+  const isInf = state.user.role === 'influencer';
+  const u = state.user;
+  const tierName = (TIERS[u.role].find(t=>t.id===u.tier)||{name:'Free'}).name;
+  const first = (u.name||'there').split(' ')[0];
+
+  const graceBanner = state.gracePeriod ? `
+    <div class="banner ${state.gracePeriod>=3?'banner-danger':'banner-warn'} mb16">
+      <span>⚠️</span>
+      <div class="grow">
+        <b>Payment failed — day ${state.gracePeriod} of 3.</b>
+        <div class="small" style="opacity:.9">${state.gracePeriod>=3?'Your subscription expires tomorrow. All premium features will be locked.':'Update your payment method to avoid service suspension.'}</div>
+      </div>
+      <button class="btn btn-sm btn-primary" data-action="fix-payment">Update payment</button>
+    </div>` : '';
+
+  const offlineBanner = state.offline ? `
+    <div class="banner banner-danger mb16"><span>📡</span><div><b>Offline mode</b><div class="small">Showing cached data. Writes are queued and will sync automatically.</div></div></div>` : '';
+
+  const rateBanner = state.rateLimited ? `
+    <div class="banner banner-warn mb16"><span>⏳</span><div><b>Syncing influencer metrics. Retrying in 60 seconds.</b>
+    <div class="small">Instagram API rate limit reached (429). We'll resume automatically.</div></div></div>` : '';
+
+  if (isInf) return renderInfluencerDashboard(first, tierName) + graceBanner + offlineBanner + rateBanner;
+  return renderBrandDashboard(first, tierName) + graceBanner + offlineBanner + rateBanner;
+}
+
+function renderInfluencerDashboard(first, tierName){
+  const recs = state.campaigns.slice().sort((a,b)=>b.match-a.match).slice(0,3);
+  const active = state.collabs.filter(c => ['in_progress','negotiating','accepted'].includes(c.status));
+  const earnings = state.collabs.filter(c=>c.payment==='released').reduce((a,c)=>a+c.rate,0);
+  const stale = state.staleMetrics;
+
+  return `
+    <div class="page-head">
+      <div>
+        <h1>Hi ${esc(first)} 👋</h1>
+        <p class="muted small mt8">Here's what's happening with your creator business today.</p>
+      </div>
+      <div class="row">
+        <span class="badge badge-primary">${tierName} plan</span>
+        ${state.user.verificationStatus === 'unverified' ? `<span class="badge badge-warn">ID not verified</span>` : `<span class="badge badge-success">✓ Verified</span>`}
+      </div>
+    </div>
+
+    <div class="grid g4 mb16">
+      <div class="stat"><div class="k">Profile views</div><div class="v">1,284</div><div class="tiny" style="color:var(--success)">▲ 12% vs last week</div></div>
+      <div class="stat"><div class="k">Match rate</div><div class="v">38%</div><div class="tiny muted">Target 35%+</div></div>
+      <div class="stat"><div class="k">Active collabs</div><div class="v">${active.length}</div><div class="tiny muted">${state.usage.activeCollabs} in negotiation</div></div>
+      <div class="stat"><div class="k">Earnings (90d)</div><div class="v">${money(earnings)}</div><div class="tiny" style="color:var(--success)">▲ 24%</div></div>
+    </div>
+
+    <div class="grid g2 mb16">
+      <div class="card">
+        <div class="row between mb12">
+          <h3>Social metrics</h3>
+          <button class="btn btn-ghost btn-sm" data-action="sync-all">↻ Sync now</button>
+        </div>
+        ${socialRow('instagram','📸','Instagram')}
+        ${socialRow('tiktok','🎵','TikTok')}
+        ${socialRow('youtube','▶️','YouTube')}
+        ${stale ? `<div class="banner banner-warn mt12"><span>🕒</span><span><b>Metrics are stale.</b> Last successful sync was 2+ hours ago.</span></div>` : ''}
+      </div>
+
+      <div class="card">
+        <h3 class="mb12">Profile completeness</h3>
+        ${progressRow('Social accounts linked', state.socials.instagram.connected && state.socials.tiktok.connected ? 100 : 66)}
+        ${progressRow('Rate card configured', 100)}
+        ${progressRow('Identity verified', state.user.verificationStatus === 'unverified' ? 20 : 100)}
+        ${progressRow('Bio & niche', 100)}
+        <div class="divider"></div>
+        <div class="row between">
+          <div>
+            <div class="small bold">Boost visibility</div>
+            <div class="tiny muted">Verified profiles get 3.2× more brand invites.</div>
+          </div>
+          <button class="btn btn-outline btn-sm" data-action="verify-id">Verify ID</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row between mb12">
+      <h3>Recommended for you</h3>
+      <button class="btn btn-ghost btn-sm" data-action="nav" data-view="discover">See all →</button>
+    </div>
+    <div class="grid g3 mb16">
+      ${recs.map(c => campaignCard(c)).join('')}
+    </div>
+
+    <div class="card pad0">
+      <div class="row between" style="padding:16px 16px 12px"><h3>Active collaborations</h3>
+        <button class="btn btn-ghost btn-sm" data-action="nav" data-view="collabs">View all</button></div>
+      ${active.length ? active.map(c => `
+        <div class="list-item">
+          <div class="avatar" style="background:linear-gradient(135deg,#6d5bff,#c084fc)">${esc(c.counterpart.slice(0,2).toUpperCase())}</div>
+          <div class="grow">
+            <div class="row between"><b class="truncate">${esc(c.campaign)}</b>${statusBadge(c.status)}</div>
+            <div class="tiny muted mt8">${esc(c.counterpart)} · ${money(c.rate)} · Due ${esc(c.due)}</div>
+            <div class="row mt8" style="gap:8px"><div class="bar-track"><i style="width:${c.progress}%"></i></div><span class="tiny muted nowrap">${c.progress}%</span></div>
+          </div>
+        </div>`).join('') : `<div class="empty"><div class="big">🤝</div><p>No active collaborations yet.</p></div>`}
+    </div>`;
+}
+
+function renderBrandDashboard(first, tierName){
+  const totalReach = state.influencers.reduce((a,i)=>a+i.followers,0);
+  const topMatches = state.influencers.slice().sort((a,b)=>b.er-a.er).slice(0,4);
+
+  return `
+    <div class="page-head">
+      <div>
+        <h1>Welcome back, ${esc(first)} 👋</h1>
+        <p class="muted small mt8">${esc(state.user.company || 'Your Brand')} · ${tierName} plan</p>
+      </div>
+      <div class="row">
+        ${state.user.verificationStatus === 'pending'
+          ? `<span class="badge badge-warn">⏳ Verification pending</span>`
+          : `<span class="badge badge-success">✓ Verified brand</span>`}
+        <button class="btn btn-primary" data-action="nav" data-view="discover">Find influencers</button>
+      </div>
+    </div>
+
+    <div class="grid g4 mb16">
+      <div class="stat"><div class="k">Outreach sent</div><div class="v">${state.usage.outreachThisWeek}</div><div class="tiny muted">This week</div></div>
+      <div class="stat"><div class="k">Response rate</div><div class="v">42%</div><div class="tiny" style="color:var(--success)">▲ 6 pts</div></div>
+      <div class="stat"><div class="k">Active campaigns</div><div class="v">${state.campaigns.length}</div><div class="tiny muted">2 paused</div></div>
+      <div class="stat"><div class="k">Total spend</div><div class="v">${money(18400)}</div><div class="tiny muted">of ${money(120000)} budget</div></div>
+    </div>
+
+    <div class="grid g2 mb16">
+      <div class="card">
+        <div class="row between mb12"><h3>Campaign performance</h3><span class="badge badge-info">Last 8 weeks</span></div>
+        <div class="chart">
+          ${[42,58,49,71,64,88,76,95].map(h=>`<div class="bar" style="height:${h}%"></div>`).join('')}
+        </div>
+        <div class="chart-x">${['W1','W2','W3','W4','W5','W6','W7','W8'].map(w=>`<span>${w}</span>`).join('')}</div>
+        <div class="divider"></div>
+        <div class="row between small"><span class="muted">Total reach</span><b>${fmtN(totalReach)}</b></div>
+        <div class="row between small mt8"><span class="muted">Avg. engagement rate</span><b>4.4%</b></div>
+        <div class="row between small mt8"><span class="muted">Cost per engagement</span><b>$0.38</b></div>
+      </div>
+
+      <div class="card">
+        <h3 class="mb12">Top matched creators</h3>
+        ${topMatches.map(i=>`
+          <div class="row mb12" style="gap:10px">
+            <div class="avatar sm">${esc(i.name.split(' ').map(w=>w[0]).join(''))}</div>
+            <div class="grow" style="min-width:0">
+              <div class="row between"><b class="small truncate">${esc(i.name)}</b><span class="badge badge-primary">${i.er}% ER</span></div>
+              <div class="tiny muted truncate">${esc(i.niches.join(' · '))} · ${fmtN(i.followers)} followers</div>
+            </div>
+            <button class="btn btn-outline btn-sm" data-action="view-influencer" data-id="${i.id}">View</button>
+          </div>`).join('')}
+        <button class="btn btn-outline btn-block mt8" data-action="nav" data-view="discover">Browse all creators</button>
+      </div>
+    </div>
+
+    <div class="card pad0">
+      <div class="row between" style="padding:16px 16px 12px"><h3>Your campaigns</h3>
+        <button class="btn btn-primary btn-sm" data-action="create-campaign">+ New campaign</button></div>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr><th>Campaign</th><th>Status</th><th>Budget</th><th>Influencers</th><th>Accepted</th></tr></thead>
+          <tbody>
+            ${state.campaigns.slice(0,5).map(c=>`
+              <tr>
+                <td><b>${esc(c.title)}</b><div class="tiny muted">${esc(c.brand)}</div></td>
+                <td><span class="badge badge-success">Active</span></td>
+                <td>${money(c.budget)}</td>
+                <td>${c.applicants}</td>
+                <td>${Math.round(c.applicants*0.28)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function socialRow(key, icon, label){
+  const s = state.socials[key];
+  const statusMap = {
+    connected:`<span class="badge badge-success">Connected</span>`,
+    disconnected:`<span class="badge badge-danger">Not connected</span>`,
+    expired:`<span class="badge badge-warn">Reconnect required</span>`,
+    review:`<span class="badge badge-warn">Needs review</span>`
+  };
+  return `
+    <div class="row between" style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div class="row" style="gap:10px;min-width:0">
+        <span style="font-size:18px">${icon}</span>
+        <div style="min-width:0">
+          <div class="row" style="gap:6px"><b class="small">${label}</b>${statusMap[s.status]||''}</div>
+          <div class="tiny muted truncate">
+            ${s.connected ? `${fmtN(s.followers)} followers · updated ${s.synced}` : 'Link your account to sync metrics'}
+          </div>
+        </div>
+      </div>
+      ${s.connected
+        ? `<button class="btn btn-ghost btn-sm" data-action="disconnect-social" data-p="${key}">Disconnect</button>`
+        : `<button class="btn btn-outline btn-sm" data-action="connect-social" data-p="${key}">Connect</button>`}
+    </div>`;
+}
+function progressRow(label, pct){
+  return `<div class="mb12">
+    <div class="row between small mb8"><span class="muted">${label}</span><b>${pct}%</b></div>
+    <div class="progress"><i style="width:${pct}%"></i></div>
+  </div>`;
+}
+function statusBadge(s){
+  const map = {
+    initiated:'badge-info', interest_expressed:'badge-info', negotiating:'badge-warn',
+    accepted:'badge-primary', in_progress:'badge-primary', completed:'badge-success',
+    declined:'badge-danger', cancelled:'badge-danger'
+  };
+  const label = s.replace(/_/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
+  return `<span class="badge ${map[s]||''}">${label}</span>`;
+}
+
+/* ============================================================
+   9. DISCOVER
+   ============================================================ */
+function viewDiscover(){
+  return state.user.role === 'influencer' ? discoverCampaigns() : discoverInfluencers();
+}
+
+/* ---------- Influencer: browse campaigns ---------- */
+function discoverCampaigns(){
+  const f = state.filters;
+  let list = state.campaigns.slice();
+  if (f.category !== 'all') list = list.filter(c => c.category === f.category);
+  if (f.sort === 'match') list.sort((a,b)=>b.match-a.match);
+  if (f.sort === 'budget') list.sort((a,b)=>b.budget-a.budget);
+  if (f.sort === 'deadline') list.sort((a,b)=>a.deadline.localeCompare(b.deadline));
+
+  const limitReached = state.usage.outreachThisWeek >= 1 && state.user.tier === 'free';
+
+  return `
+    <div class="page-head">
+      <div><h1>Discover campaigns</h1>
+        <p class="muted small mt8">${state.user.tier==='free'
+          ? `Free plan: ${Math.max(0,10-state.usage.brandViewsToday)} of 10 brand views remaining today · ${Math.max(0,1-state.usage.outreachThisWeek)} outreach left this week`
+          : 'Unlimited browsing and outreach with your plan'}</p></div>
+    </div>
+
+    <div class="card mb16">
+      <div class="row wrap" style="gap:10px">
+        <input class="input" style="flex:1;min-width:180px" placeholder="🔍 Search campaigns or brands…" oninput="state.searchQ=this.value;renderContent()">
+        <select class="select" style="width:auto" onchange="setFilter('category',this.value)">
+          <option value="all">All categories</option>
+          ${[...new Set(state.campaigns.map(c=>c.category))].map(c=>`<option ${f.category===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+        <select class="select" style="width:auto" onchange="setFilter('sort',this.value)">
+          <option value="match" ${f.sort==='match'?'selected':''}>Best match</option>
+          <option value="budget" ${f.sort==='budget'?'selected':''}>Highest budget</option>
+          <option value="deadline" ${f.sort==='deadline'?'selected':''}>Closing soon</option>
+        </select>
+      </div>
+    </div>
+
+    ${limitReached ? `<div class="banner banner-warn mb16"><span>🔒</span>
+      <div class="grow"><b>Weekly outreach limit reached.</b>
+      <div class="small">Free plan allows 1 outreach per week. Upgrade to Creator for unlimited outreach.</div></div>
+      <button class="btn btn-sm btn-primary" data-action="upgrade" data-tier="creator">Upgrade</button></div>` : ''}
+
+    ${list.length === 0 ? emptyState() : `<div class="grid g2">${list.map(c=>campaignCard(c,true)).join('')}</div>`}
+  `;
+}
+
+function campaignCard(c, full = false){
+  const saved = state.watchlist.includes(c.id);
+  return `
+    <div class="card">
+      <div class="row between mb12" style="align-items:flex-start">
+        <div class="row" style="gap:10px;min-width:0">
+          <div class="avatar" style="background:linear-gradient(135deg,#0ea5e9,#6366f1)">${esc(c.brand.slice(0,2).toUpperCase())}</div>
+          <div style="min-width:0">
+            <div class="row" style="gap:6px">
+              <b class="truncate">${esc(c.brand)}</b>
+              ${c.verified ? `<span class="badge badge-success" title="Verified brand">✓</span>` : `<span class="badge badge-warn" title="Pending verification">⏳</span>`}
+            </div>
+            <div class="tiny muted">${esc(c.category)} · ${c.applicants} applicants</div>
+          </div>
+        </div>
+        <button class="icon-btn" data-action="save-campaign" data-id="${c.id}" title="Save">${saved?'★':'☆'}</button>
+      </div>
+
+      <h3 class="mb8">${esc(c.title)}</h3>
+      ${full ? `<p class="small muted mb12">${esc(c.description)}</p>` : ''}
+
+      <div class="row wrap mb12" style="gap:6px">
+        ${c.deliverables.map(d=>`<span class="badge">${esc(d)}</span>`).join('')}
+      </div>
+
+      <div class="row between mb12">
+        <div><div class="tiny muted">Budget</div><b>${esc(c.rate)}</b></div>
+        <div style="text-align:right"><div class="tiny muted">Deadline</div><b>${esc(c.deadline)}</b></div>
+      </div>
+
+      <div class="row between">
+        <span class="badge badge-primary">${c.match}% match</span>
+        <div class="row" style="gap:8px">
+          <button class="btn btn-outline btn-sm" data-action="view-campaign" data-id="${c.id}">Details</button>
+          <button class="btn btn-primary btn-sm" data-action="outreach" data-id="${c.id}">Send proposal</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ---------- Brand: search influencers ---------- */
+function discoverInfluencers(){
+  const f = state.filters;
+  let list = state.influencers.slice();
+  if (f.niche !== 'all') list = list.filter(i => i.niches.includes(f.niche));
+  if (f.location !== 'all') list = list.filter(i => i.loc === f.location);
+  if (f.verifiedOnly) list = list.filter(i => i.verified);
+  list = list.filter(i => i.followers >= f.minFollowers && i.followers <= f.maxFollowers);
+  list = list.filter(i => i.er >= f.minER);
+  if (f.sort === 'followers') list.sort((a,b)=>b.followers-a.followers);
+  else if (f.sort === 'er') list.sort((a,b)=>b.er-a.er);
+  else if (f.sort === 'rate') list.sort((a,b)=>a.rate-b.rate);
+  else list.sort((a,b)=>b.rating-a.rating);
+
+  const selCount = state.selectedInfluencers.length;
+  const estCost = state.selectedInfluencers.reduce((a,id)=>{
+    const i = state.influencers.find(x=>x.id===id); return a + (i?i.rate:0);
+  },0);
+
+  return `
+    <div class="page-head">
+      <div><h1>Find influencers</h1>
+        <p class="muted small mt8">${list.length} creators match your filters</p></div>
+      <button class="btn btn-outline" data-action="save-list">💾 Save list</button>
+    </div>
+
+    <div class="card mb16">
+      <div class="row wrap" style="gap:10px">
+        <input class="input" style="flex:1;min-width:200px" placeholder="🔍 Search by name or @handle…" oninput="state.searchQ=this.value;renderContent()">
+        <select class="select" style="width:auto" onchange="setFilter('niche',this.value)">
+          <option value="all">All niches</option>
+          ${NICHES.map(n=>`<option ${f.niche===n?'selected':''}>${n}</option>`).join('')}
+        </select>
+        <select class="select" style="width:auto" onchange="setFilter('location',this.value)">
+          <option value="all">All locations</option>
+          ${[...new Set(state.influencers.map(i=>i.loc))].map(l=>`<option ${f.location===l?'selected':''}>${l}</option>`).join('')}
+        </select>
+        <select class="select" style="width:auto" onchange="setFilter('sort',this.value)">
+          <option value="rating" ${f.sort==='rating'?'selected':''}>Top rated</option>
+          <option value="followers" ${f.sort==='followers'?'selected':''}>Most followers</option>
+          <option value="er" ${f.sort==='er'?'selected':''}>Highest engagement</option>
+          <option value="rate" ${f.sort==='rate'?'selected':''}>Lowest rate</option>
+        </select>
+      </div>
+
+      <div class="row wrap mt12" style="gap:16px">
+        <div class="field" style="min-width:200px">
+          <label>Follower range: ${fmtN(f.minFollowers)} – ${fmtN(f.maxFollowers)}</label>
+          <input type="range" min="0" max="2000000" step="10000" value="${f.maxFollowers}"
+                 oninput="setFilter('maxFollowers',+this.value)">
+        </div>
+        <div class="field" style="min-width:180px">
+          <label>Min engagement rate: ${f.minER}%</label>
+          <input type="range" min="0" max="10" step="0.5" value="${f.minER}" oninput="setFilter('minER',+this.value)">
+        </div>
+        <div class="field">
+          <label>Verified only</label>
+          <div class="row"><div class="switch ${f.verifiedOnly?'on':''}" data-action="toggle-verified"></div></div>
+        </div>
+      </div>
+    </div>
+
+    ${list.length === 0 ? emptyState() : `
+      <div class="card pad0 mb16">
+        ${list.map(i => influencerRow(i)).join('')}
+      </div>`}
+
+    ${selCount ? `
+      <div class="card" style="position:sticky;bottom:12px;box-shadow:var(--sh-lg);border-color:var(--primary)">
+        <div class="row between wrap" style="gap:12px">
+          <div>
+            <b>${selCount} influencer${selCount>1?'s':''} selected</b>
+            <div class="tiny muted">Estimated cost: ${money(estCost)}</div>
+          </div>
+          <div class="row" style="gap:8px">
+            <button class="btn btn-ghost btn-sm" data-action="clear-selection">Clear</button>
+            <button class="btn btn-primary btn-sm" data-action="bulk-outreach">Send outreach →</button>
+          </div>
+        </div>
+      </div>` : ''}
+  `;
+}
+
+function influencerRow(i){
+  const sel = state.selectedInfluencers.includes(i.id);
+  return `
+    <div class="list-item ${sel?'selected':''}">
+      <div class="checkbox ${sel?'on':''}" data-action="select-influencer" data-id="${i.id}">${sel?'✓':''}</div>
+      <div class="avatar">${esc(i.name.split(' ').map(w=>w[0]).join(''))}</div>
+      <div class="grow" style="min-width:0">
+        <div class="row" style="gap:6px">
+          <b class="truncate">${esc(i.name)}</b>
+          ${i.verified?`<span class="badge badge-success" title="Verified">✓</span>`:''}
+        </div>
+        <div class="tiny muted truncate">${esc(i.handle)} · ${esc(i.niches.join(', '))} · ${esc(i.loc)}</div>
+        <div class="row wrap mt8" style="gap:6px">
+          <span class="badge">${fmtN(i.followers)} followers</span>
+          <span class="badge badge-primary">${i.er}% ER</span>
+          <span class="badge">★ ${i.rating}</span>
+          <span class="badge">${money(i.rate)}/post</span>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm nowrap" data-action="view-influencer" data-id="${i.id}">Profile</button>
+    </div>`;
+}
+
+function emptyState(){
+  return `
+    <div class="card empty">
+      <div class="big">🔍</div>
+      <h3>No influencers match all criteria</h3>
+      <p class="small muted mt8">Try expanding location, lowering the minimum engagement rate, or widening the follower range.</p>
+      <div class="row wrap mt16" style="justify-content:center;gap:8px">
+        <button class="btn btn-outline btn-sm" data-action="suggest-filter">Try: 100K+ followers</button>
+        <button class="btn btn-outline btn-sm" data-action="suggest-filter">Try: Any location</button>
+        <button class="btn btn-outline btn-sm" data-action="suggest-filter">Try: Min ER 0%</button>
+      </div>
+    </div>`;
+}
+
+/* ============================================================
+   10. COLLABORATIONS
+   ============================================================ */
+function viewCollabs(){
+  const tabs = [['all','All'],['initiated','New'],['negotiating','Negotiating'],['in_progress','In progress'],['completed','Completed']];
+  let list = state.collabs.slice();
+  if (state.collabTab !== 'all') list = list.filter(c => c.status === state.collabTab);
+
+  return `
+    <div class="page-head">
+      <div><h1>Collaborations</h1><p class="muted small mt8">${state.collabs.length} total · ${state.collabs.filter(c=>['in_progress','negotiating'].includes(c.status)).length} active</p></div>
+    </div>
+
+    <div class="tabs">
+      ${tabs.map(([id,label])=>{
+        const n = id==='all' ? state.collabs.length : state.collabs.filter(c=>c.status===id).length;
+        return `<button class="tab ${state.collabTab===id?'active':''}" data-action="collab-tab" data-t="${id}">${label} (${n})</button>`;
+      }).join('')}
+    </div>
+
+    ${list.length === 0 ? `<div class="card empty"><div class="big">📭</div><p>Nothing here yet.</p></div>` : `
+      <div class="grid g2">
+        ${list.map(c => `
+          <div class="card">
+            <div class="row between mb12">
+              <div class="row" style="gap:10px;min-width:0">
+                <div class="avatar" style="background:linear-gradient(135deg,#6d5bff,#c084fc)">${esc(c.counterpart.slice(0,2).toUpperCase())}</div>
+                <div style="min-width:0">
+                  <b class="truncate">${esc(c.campaign)}</b>
+                  <div class="tiny muted">${esc(c.counterpart)} · created ${esc(c.created)}</div>
+                </div>
+              </div>
+              ${statusBadge(c.status)}
+            </div>
+
+            <div class="row wrap mb12" style="gap:6px">
+              ${c.deliverables.map(d=>`<span class="badge">${esc(d)}</span>`).join('')}
+            </div>
+
+            <div class="row between mb12">
+              <div><div class="tiny muted">Rate</div><b>${money(c.rate)}</b></div>
+              <div><div class="tiny muted">Due</div><b>${esc(c.due)}</b></div>
+              <div style="text-align:right"><div class="tiny muted">Payment</div>
+                <span class="badge ${c.payment==='released'?'badge-success':c.payment==='escrowed'?'badge-info':'badge-warn'}">${esc(c.payment)}</span></div>
+            </div>
+
+            <div class="row mb12" style="gap:8px">
+              <div class="bar-track"><i style="width:${c.progress}%"></i></div>
+              <span class="tiny muted nowrap">${c.progress}%</span>
+            </div>
+
+            <div class="row" style="gap:8px">
+              <button class="btn btn-outline btn-sm grow" data-action="collab-open" data-id="${c.id}">View details</button>
+              <button class="btn btn-primary btn-sm grow" data-action="open-collab-thread" data-id="${c.id}">Message</button>
+            </div>
+          </div>`).join('')}
+      </div>`}`;
+}
+
+/* ============================================================
+   11. MESSAGES
+   ============================================================ */
+function viewMessages(){
+  const active = state.threads.find(t => t.id === state.activeThread) || state.threads[0];
+  return `
+    <div class="page-head">
+      <div><h1>Messages</h1><p class="muted small mt8">Negotiate terms and track deliverables in-thread.</p></div>
+    </div>
+    <div class="thread-layout" id="threadLayout">
+      <div class="thread-list" id="threadList">
+        ${state.threads.map(t => `
+          <div class="thread-item ${t.id===state.activeThread?'active':''}" data-action="open-thread" data-id="${t.id}">
+            <div class="avatar sm">${esc(t.avatar)}</div>
+            <div class="grow" style="min-width:0">
+              <div class="row between"><b class="small truncate">${esc(t.name)}</b>
+                ${t.unread?`<span class="badge badge-danger">${t.unread}</span>`:''}</div>
+              <div class="tiny muted truncate">${esc(t.messages[t.messages.length-1]?.text || '')}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+      <div class="thread-pane">
+        <div class="row between" style="padding:12px 14px;border-bottom:1px solid var(--border)">
+          <button class="btn btn-ghost btn-sm" data-action="msg-back" style="display:none" id="msgBack">←</button>
+          <div class="row" style="gap:10px;min-width:0">
+            <div class="avatar sm">${esc(active.avatar)}</div>
+            <div style="min-width:0"><b class="small truncate">${esc(active.name)}</b>
+              <div class="tiny muted">Collaboration thread</div></div>
+          </div>
+          <button class="btn btn-outline btn-sm" data-action="collab-open" data-id="${active.collabId}">Deal details</button>
+        </div>
+
+        <div class="msg-scroll" id="msgScroll">
+          ${active.messages.map(m => renderMessage(m)).join('')}
+        </div>
+
+        <div class="composer">
+          <input class="input grow" id="msgInput" placeholder="Write a message…" onkeydown="if(event.key==='Enter')sendMessage()">
+          <button class="btn btn-outline" data-action="open-counter">⇄ Counter</button>
+          <button class="btn btn-primary" data-action="send-message">Send</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderMessage(m){
+  if (m.type === 'proposal' || m.type === 'counter'){
+    const isCounter = m.type === 'counter';
+    return `
+      <div class="proposal-card" style="${m.from==='me'?'align-self:flex-end':''}">
+        <div class="row between mb8">
+          <span class="badge ${isCounter?'badge-warn':'badge-primary'}">${isCounter?'⇄ Counter-proposal':'📋 Proposal'}</span>
+          <span class="tiny muted">${esc(m.at)}</span>
+        </div>
+        <div class="row between mb8"><span class="muted small">Rate</span><b>${money(m.data.rate)}</b></div>
+        <div class="row between mb8"><span class="muted small">Deliverables</span><b class="small" style="text-align:right;max-width:60%">${esc(m.data.deliverables.join(', '))}</b></div>
+        <div class="row between mb12"><span class="muted small">Payment terms</span><b class="small">${esc(m.data.terms)}</b></div>
+        ${m.from !== 'me' ? `
+          <div class="row" style="gap:8px">
+            <button class="btn btn-primary btn-sm grow" data-action="accept-proposal">Accept</button>
+            <button class="btn btn-outline btn-sm grow" data-action="open-counter">Counter</button>
+            <button class="btn btn-ghost btn-sm" data-action="decline-proposal">Decline</button>
+          </div>` : `<div class="tiny muted">Awaiting response…</div>`}
+      </div>`;
+  }
+  return `<div class="msg ${m.from==='me'?'me':'them'}">${esc(m.text)}<div class="meta">${esc(m.at)}</div></div>`;
+}
+
+function mountMessages(){
+  const sc = $('#msgScroll');
+  if (sc) sc.scrollTop = sc.scrollHeight;
+  const back = $('#msgBack');
+  if (back && window.innerWidth <= 860 && state.messagesPane === 'chat'){
+    back.style.display = 'inline-flex';
+    $('#threadLayout')?.classList.add('show-pane');
+  }
+}
+
+/* ============================================================
+   12. ANALYTICS
+   ============================================================ */
+function viewAnalytics(){
+  if (state.user.role === 'influencer') return viewInfluencerAnalytics();
+  return viewBrandAnalytics();
+}
+
+function viewInfluencerAnalytics(){
+  const growth = [152,158,163,171,168,176,181,184];
+  const labels = ['Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
+  const max = Math.max(...growth);
+  const inf = {audience:{'18-24':46,'25-34':34,'35-44':14,'45-54':4,'55+':2}, gender:{f:72,m:25,o:3}};
+
+  return `
+    <div class="page-head">
+      <div><h1>Analytics</h1><p class="muted small mt8">Synced from connected social accounts · updated hourly</p></div>
+      <button class="btn btn-outline" data-action="export-report">⬇ Export report</button>
+    </div>
+
+    <div class="grid g4 mb16">
+      <div class="stat"><div class="k">Followers</div><div class="v">${fmtN(184210)}</div><div class="tiny" style="color:var(--success)">▲ 2.4% this month</div></div>
+      <div class="stat"><div class="k">Engagement rate</div><div class="v">4.2%</div><div class="tiny" style="color:var(--success)">▲ 0.3 pts</div></div>
+      <div class="stat"><div class="k">Avg. reach / post</div><div class="v">62.4K</div><div class="tiny muted">Last 30 posts</div></div>
+      <div class="stat"><div class="k">Niche benchmark</div><div class="v">3.6%</div><div class="tiny" style="color:var(--success)">You're 0.6 pts above</div></div>
+    </div>
+
+    <div class="grid g2 mb16">
+      <div class="card">
+        <h3 class="mb12">Follower growth</h3>
+        <div class="chart">
+          ${growth.map(g=>`<div class="bar" style="height:${Math.round(g/max*100)}%"></div>`).join('')}
+        </div>
+        <div class="chart-x">${labels.map(l=>`<span>${l}</span>`).join('')}</div>
+      </div>
+
+      <div class="card">
+        <h3 class="mb12">Audience demographics</h3>
+        ${Object.entries(inf.audience).map(([k,v])=>`
+          <div class="row mb8" style="gap:10px">
+            <span class="tiny muted nowrap" style="width:52px">${k}</span>
+            <div class="bar-track"><i style="width:${v}%"></i></div>
+            <span class="tiny bold nowrap">${v}%</span>
+          </div>`).join('')}
+        <div class="divider"></div>
+        <div class="row" style="gap:16px">
+          <div><div class="tiny muted">Female</div><b>${inf.gender.f}%</b></div>
+          <div><div class="tiny muted">Male</div><b>${inf.gender.m}%</b></div>
+          <div><div class="tiny muted">Other</div><b>${inf.gender.o}%</b></div>
+        </div>
+        <p class="tiny muted mt12">Audience demographics provided by Instagram; calculated from available data.</p>
+      </div>
+    </div>
+
+    <div class="card pad0">
+      <div class="row between" style="padding:16px 16px 12px"><h3>Post performance</h3></div>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr><th>Post</th><th>Platform</th><th>Reach</th><th>Likes</th><th>Comments</th><th>ER</th></tr></thead>
+          <tbody>
+            ${[
+              ['Glow serum routine','Instagram','82.1K','5,240','312','4.8%'],
+              ['Morning stretch','TikTok','44.7K','3,120','188','6.1%'],
+              ['Skincare myths','Instagram','61.9K','3,880','241','3.9%'],
+              ['Product empties','Instagram','38.2K','2,110','96','3.2%']
+            ].map(r=>`<tr>${r.map((c,i)=>`<td>${i===0?`<b>${esc(c)}</b>`:esc(c)}</td>`).join('')}</tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function viewBrandAnalytics(){
+  return `
+    <div class="page-head">
+      <div><h1>Campaign analytics</h1><p class="muted small mt8">ROI across all active and completed campaigns</p></div>
+      <button class="btn btn-outline" data-action="export-report">⬇ Export CSV</button>
+    </div>
+
+    <div class="grid g4 mb16">
+      <div class="stat"><div class="k">Total reach</div><div class="v">4.2M</div><div class="tiny" style="color:var(--success)">▲ 18%</div></div>
+      <div class="stat"><div class="k">Engagements</div><div class="v">186K</div><div class="tiny" style="color:var(--success)">▲ 11%</div></div>
+      <div class="stat"><div class="k">Conversions</div><div class="v">4,820</div><div class="tiny" style="color:var(--success)">▲ 27%</div></div>
+      <div class="stat"><div class="k">ROAS</div><div class="v">3.4×</div><div class="tiny muted">Target 3.0×</div></div>
+    </div>
+
+    <div class="grid g2 mb16">
+      <div class="card">
+        <h3 class="mb12">Spend vs. budget</h3>
+        <div class="chart">
+          ${[30,45,38,62,55,74,68,82].map(h=>`<div class="bar" style="height:${h}%"></div>`).join('')}
+        </div>
+        <div class="chart-x">${['W1','W2','W3','W4','W5','W6','W7','W8'].map(w=>`<span>${w}</span>`).join('')}</div>
+      </div>
+      <div class="card">
+        <h3 class="mb12">Cost efficiency</h3>
+        <div class="row between small mb12"><span class="muted">Cost per engagement</span><b>$0.38</b></div>
+        <div class="row between small mb12"><span class="muted">Cost per click</span><b>$1.24</b></div>
+        <div class="row between small mb12"><span class="muted">Cost per conversion</span><b>$8.60</b></div>
+        <div class="row between small mb12"><span class="muted">Avg. engagement rate</span><b>4.4%</b></div>
+        <div class="divider"></div>
+        <div class="banner banner-success"><span>✓</span><span>Your campaigns are outperforming the platform median by 22%.</span></div>
+      </div>
+    </div>
+
+    <div class="card pad0">
+      <div style="padding:16px 16px 12px"><h3>Campaign breakdown</h3></div>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr><th>Campaign</th><th>Spend</th><th>Reach</th><th>Engagements</th><th>ROAS</th></tr></thead>
+          <tbody>
+            ${state.campaigns.slice(0,5).map(c=>`
+              <tr>
+                <td><b>${esc(c.title)}</b></td>
+                <td>${money(Math.round(c.budget*0.42))}</td>
+                <td>${fmtN(Math.round(c.budget*12))}</td>
+                <td>${fmtN(Math.round(c.budget*2.1))}</td>
+                <td><span class="badge badge-success">${(2.2+Math.random()*2).toFixed(1)}×</span></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+/* ============================================================
+   13. PROFILE
+   ============================================================ */
+function viewProfile(){
+  return state.user.role === 'influencer' ? viewInfluencerProfile() : viewBrandProfile();
+}
+
+function viewInfluencerProfile(){
+  const inf = state.influencers[0];
+  const mismatch = state.socials.instagram.status === 'review';
+  const [lo, hi] = suggestedRange(state.socials.instagram.followers || inf.followers);
+
+  return `
+    <div class="card mb16">
+      <div class="row wrap" style="gap:16px">
+        <div class="avatar lg">AC</div>
+        <div class="grow" style="min-width:200px">
+          <div class="row" style="gap:8px">
+            <h1>${esc(state.user.name)}</h1>
+            ${state.user.verificationStatus === 'unverified'
+              ? `<span class="badge badge-warn">Unverified</span>`
+              : `<span class="badge badge-success">✓ Verified</span>`}
+          </div>
+          <p class="muted small mt8">${esc(inf.handle)} · ${esc(inf.niches.join(' · '))} · ${esc(inf.loc)}</p>
+          <div class="row wrap mt12" style="gap:6px">
+            <span class="badge badge-primary">${fmtN(state.socials.instagram.followers)} followers</span>
+            <span class="badge">${inf.er}% ER</span>
+            <span class="badge">★ ${inf.rating}</span>
+            <span class="badge">${inf.collabs} collabs</span>
+          </div>
+        </div>
+        <div class="col" style="gap:8px">
+          <button class="btn btn-outline btn-sm" data-action="edit-profile">Edit profile</button>
+          <button class="btn btn-outline btn-sm" data-action="preview-public">Preview as brand</button>
+        </div>
+      </div>
+    </div>
+
+    ${mismatch ? `<div class="banner banner-warn mb16"><span>⚠️</span>
+      <div><b>Follower count mismatch detected.</b>
+      <div class="small">Your profile is under review. Self-reported 250K vs API-retrieved ${fmtN(state.socials.instagram.followers)} (&gt;15% variance). This may limit visibility to brands.</div></div></div>` : ''}
+
+    <div class="tabs">
+      ${[['overview','Overview'],['socials','Social accounts'],['rates','Rate card'],['verification','Verification']]
+        .map(([id,l])=>`<button class="tab ${state.profileTab===id?'active':''}" data-action="profile-tab" data-t="${id}">${l}</button>`).join('')}
+    </div>
+
+    ${state.profileTab === 'overview' ? `
+      <div class="grid g2">
+        <div class="card">
+          <h3 class="mb12">Bio</h3>
+          <p class="small muted">${esc(inf.bio)}</p>
+          <div class="divider"></div>
+          <h3 class="mb12">Niche targeting</h3>
+          <div class="row wrap" style="gap:6px">
+            <span class="chip active">${esc(inf.niches[0])}</span>
+            ${inf.niches.slice(1).map(n=>`<span class="chip">${esc(n)}</span>`).join('')}
+          </div>
+          <div class="divider"></div>
+          <div class="row between"><span class="small muted">Accepting collaborations</span>
+            <div class="switch on" data-action="toggle-availability"></div></div>
+        </div>
+        <div class="card">
+          <h3 class="mb12">Audience snapshot</h3>
+          ${Object.entries(inf.audience).map(([k,v])=>`
+            <div class="row mb8" style="gap:10px">
+              <span class="tiny muted nowrap" style="width:52px">${k}</span>
+              <div class="bar-track"><i style="width:${v}%"></i></div>
+              <span class="tiny bold nowrap">${v}%</span>
+            </div>`).join('')}
+          <div class="divider"></div>
+          <div class="row between small"><span class="muted">Top location</span><b>United States (58%)</b></div>
+        </div>
+      </div>` : ''}
+
+    ${state.profileTab === 'socials' ? `
+      <div class="card">
+        <div class="row between mb12">
+          <h3>Connected accounts</h3>
+          <button class="btn btn-ghost btn-sm" data-action="sync-all">↻ Sync all</button>
+        </div>
+        ${socialRow('instagram','📸','Instagram')}
+        ${socialRow('tiktok','🎵','TikTok')}
+        ${socialRow('youtube','▶️','YouTube')}
+        <p class="tiny muted mt16">
+          Metrics sync every 60 minutes via official platform APIs. We never store raw follower lists —
+          only aggregated, anonymized statistics.
+        </p>
+      </div>` : ''}
+
+    ${state.profileTab === 'rates' ? `
+      <div class="card">
+        <div class="row between mb16 wrap" style="gap:12px">
+          <div><h3>Rate card</h3>
+            <p class="tiny muted mt8">Suggested range for your audience: ${money(lo)} – ${money(hi)} per post</p></div>
+          <div class="row" style="gap:12px">
+            <div class="row" style="gap:6px"><span class="tiny muted">Public</span>
+              <div class="switch ${state.ratesPublic?'on':''}" data-action="toggle-rates-public"></div></div>
+            <div class="row" style="gap:6px"><span class="tiny muted">Negotiable</span>
+              <div class="switch ${state.ratesNegotiable?'on':''}" data-action="toggle-rates-negotiable"></div></div>
+          </div>
+        </div>
+
+        ${RATE_ITEMS.map(r => `
+          <div class="rate-row">
+            <div class="grow" style="min-width:180px">
+              <div class="row" style="gap:8px">
+                <div class="switch ${state.rates[r.id].on?'on':''}" data-action="toggle-rate-item" data-id="${r.id}"></div>
+                <b class="small">${esc(r.label)}</b>
+              </div>
+              <div class="tiny muted mt8" style="padding-left:52px">Suggested: ${money(r.base)} – ${money(r.max)}</div>
+            </div>
+            <div class="row" style="gap:4px">
+              <span class="muted small">$</span>
+              <input class="input" type="number" value="${state.rates[r.id].value}"
+                     oninput="state.rates['${r.id}'].value=+this.value" ${state.rates[r.id].on?'':'disabled'}>
+            </div>
+          </div>`).join('')}
+
+        <div class="row between mt16">
+          <span class="tiny muted">Changes take effect immediately for brands viewing your profile.</span>
+          <button class="btn btn-primary btn-sm" data-action="save-rates">Save rate card</button>
+        </div>
+      </div>` : ''}
+
+    ${state.profileTab === 'verification' ? `
+      <div class="grid g2">
+        <div class="card">
+          <h3 class="mb12">Identity verification</h3>
+          <p class="small muted mb16">Verify your identity with a selfie + government ID. Verified creators receive 3.2× more brand invitations.</p>
+          <div class="row between mb12"><span class="small">Status</span>
+            ${state.user.verificationStatus === 'unverified'
+              ? `<span class="badge badge-warn">Not started</span>`
+              : `<span class="badge badge-success">Approved</span>`}</div>
+          <button class="btn btn-primary btn-block" data-action="verify-id">${state.user.verificationStatus==='unverified'?'Start verification':'Re-verify'}</button>
+        </div>
+        <div class="card">
+          <h3 class="mb12">Social account authenticity</h3>
+          <div class="row between mb12"><span class="small">Instagram</span><span class="badge badge-success">✓ Match</span></div>
+          <div class="row between mb12"><span class="small">TikTok</span><span class="badge badge-success">✓ Match</span></div>
+          <div class="row between mb12"><span class="small">YouTube</span><span class="badge">Not linked</span></div>
+          <div class="banner banner-info mt16"><span>ℹ️</span><span>We compare your self-reported follower count against platform APIs. Variances over 15% trigger a manual review.</span></div>
+        </div>
+      </div>` : ''}`;
+}
+
+function viewBrandProfile(){
+  const team = [
+    {name:'Jordan Blake', email:'jordan@lumenskin.com', role:'Admin'},
+    {name:'Priya Shah', email:'priya@lumenskin.com', role:'Campaign Manager'},
+    {name:'Sam Ortiz', email:'sam@lumenskin.com', role:'Analyst'}
+  ];
+  return `
+    <div class="card mb16">
+      <div class="row wrap" style="gap:16px">
+        <div class="avatar lg" style="background:linear-gradient(135deg,#0ea5e9,#6366f1)">LS</div>
+        <div class="grow" style="min-width:200px">
+          <div class="row" style="gap:8px">
+            <h1>${esc(state.user.company || 'Lumen Skincare')}</h1>
+            ${state.user.verificationStatus === 'pending'
+              ? `<span class="badge badge-warn">⏳ Pending verification</span>`
+              : `<span class="badge badge-success">✓ Verified</span>`}
+          </div>
+          <p class="muted small mt8">lumenskin.com · Beauty · Mid-market</p>
+          <div class="row wrap mt12" style="gap:6px">
+            <span class="badge">${team.length} team members</span>
+            <span class="badge">6 campaigns</span>
+            <span class="badge badge-primary">Marketing plan</span>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" data-action="edit-brand">Edit brand profile</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      ${[['overview','Overview'],['team','Team'],['assets','Brand assets'],['verification','Verification']]
+        .map(([id,l])=>`<button class="tab ${state.profileTab===id?'active':''}" data-action="profile-tab" data-t="${id}">${l}</button>`).join('')}
+    </div>
+
+    ${state.profileTab === 'overview' ? `
+      <div class="grid g2">
+        <div class="card">
+          <h3 class="mb12">Company details</h3>
+          <div class="row between small mb12"><span class="muted">Legal entity</span><b>LLC</b></div>
+          <div class="row between small mb12"><span class="muted">Industry</span><b>Beauty</b></div>
+          <div class="row between small mb12"><span class="muted">Domain</span><b>lumenskin.com</b></div>
+          <div class="row between small"><span class="muted">Default campaign budget</span><b>${money(45000)}</b></div>
+        </div>
+        <div class="card">
+          <h3 class="mb12">Plan usage</h3>
+          ${progressRow('Concurrent campaigns (4 / 5)', 80)}
+          ${progressRow('Team seats (3 / 2)', 100)}
+          <div class="banner banner-warn mt8"><span>⚠️</span><span>You've exceeded your team seat allocation. Upgrade to Agency for 10 seats.</span></div>
+        </div>
+      </div>` : ''}
+
+    ${state.profileTab === 'team' ? `
+      <div class="card pad0">
+        <div class="row between" style="padding:16px 16px 12px">
+          <h3>Team members</h3>
+          <button class="btn btn-primary btn-sm" data-action="invite-member">+ Invite</button>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Member</th><th>Email</th><th>Role</th><th></th></tr></thead>
+          <tbody>
+            ${team.map(m=>`
+              <tr>
+                <td><div class="row" style="gap:8px"><div class="avatar sm">${esc(m.name.split(' ').map(w=>w[0]).join(''))}</div><b>${esc(m.name)}</b></div></td>
+                <td class="muted">${esc(m.email)}</td>
+                <td><span class="badge badge-primary">${esc(m.role)}</span></td>
+                <td style="text-align:right"><button class="btn btn-ghost btn-sm" data-action="member-menu">⋯</button></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+        <div style="padding:12px 16px" class="banner banner-info">
+          <span>ℹ️</span><span>Team members signing up with <b>@lumenskin.com</b> are automatically linked to this organization.</span>
+        </div>
+      </div>` : ''}
+
+    ${state.profileTab === 'assets' ? `
+      <div class="card">
+        <h3 class="mb12">Brand assets</h3>
+        <p class="small muted mb16">Upload logos, brand guidelines and approved creative templates for creators.</p>
+        <div class="grid g3">
+          ${['logo_primary.png','brand_guidelines.pdf','template_ig_post.psd'].map(f=>`
+            <div class="card flat" style="background:var(--surface-2);text-align:center;padding:20px">
+              <div style="font-size:26px">📎</div>
+              <div class="tiny bold mt8 truncate">${f}</div>
+            </div>`).join('')}
+          <button class="card flat" style="background:var(--surface-2);text-align:center;padding:20px;border-style:dashed;cursor:pointer" data-action="upload-asset">
+            <div style="font-size:26px">＋</div>
+            <div class="tiny bold mt8">Upload asset</div>
+          </button>
+        </div>
+      </div>` : ''}
+
+    ${state.profileTab === 'verification' ? `
+      <div class="grid g2">
+        <div class="card">
+          <h3 class="mb12">Business verification</h3>
+          <div class="row between mb12"><span class="small">Status</span>
+            ${state.user.verificationStatus === 'pending'
+              ? `<span class="badge badge-warn">In review (SLA 48h)</span>`
+              : `<span class="badge badge-success">Approved</span>`}</div>
+          <div class="row between mb12"><span class="small">Document</span><b class="small">business_license.pdf</b></div>
+          <div class="row between mb12"><span class="small">Submitted</span><b class="small">2026-09-19</b></div>
+          <button class="btn btn-outline btn-block" data-action="resubmit-doc">Re-upload document</button>
+        </div>
+        <div class="card">
+          <h3 class="mb12">Why verify?</h3>
+          <ul class="small muted" style="padding-left:18px;margin:0">
+            <li>Verified badge on all outreach messages</li>
+            <li>Up to 2.4× higher creator response rate</li>
+            <li>Access to premium creator tiers</li>
+            <li>Escrow-protected payments</li>
+          </ul>
+        </div>
+      </div>` : ''}`;
+}
+
+/* ============================================================
+   14. SUBSCRIPTION
+   ============================================================ */
+function viewSubscription(){
+  const role = state.user.role;
+  const tiers = TIERS[role];
+  const current = tiers.find(t => t.id === state.user.tier) || tiers[0];
+  const isInf = role === 'influencer';
+
+  const usage = isInf
+    ? [['Brand views today', state.usage.brandViewsToday, 10], ['Outreach this week', state.usage.outreachThisWeek, 1], ['Active collaborations', state.usage.activeCollabs, 3]]
+    : [['Influencer outreach', state.usage.outreachThisWeek, 20], ['Concurrent campaigns', 4, 5], ['Team seats', 3, 2]];
+
+  return `
+    <div class="page-head">
+      <div><h1>Subscription &amp; billing</h1><p class="muted small mt8">Manage your plan, payment method and invoices.</p></div>
+    </div>
+
+    ${state.gracePeriod ? `
+      <div class="banner ${state.gracePeriod>=3?'banner-danger':'banner-warn'} mb16">
+        <span>⚠️</span>
+        <div class="grow"><b>Payment failed — day ${state.gracePeriod} of 3 grace period.</b>
+        <div class="small">${state.gracePeriod>=3?'Your subscription expires tomorrow. All premium features will be locked.':'Update your payment method to avoid service suspension.'}</div></div>
+        <button class="btn btn-sm btn-primary" data-action="fix-payment">Update payment</button>
+      </div>` : ''}
+
+    <div class="tabs">
+      ${[['plans','Plans'],['usage','Usage'],['billing','Billing history'],['manage','Manage']]
+        .map(([id,l])=>`<button class="tab ${state.subscriptionTab===id?'active':''}" data-action="sub-tab" data-t="${id}">${l}</button>`).join('')}
+    </div>
+
+    ${state.subscriptionTab === 'plans' ? `
+      <div class="card mb16" style="border-color:var(--primary)">
+        <div class="row between wrap" style="gap:12px">
+          <div>
+            <span class="badge badge-primary">Current plan</span>
+            <h3 class="mt8">${esc(current.name)}</h3>
+            <p class="small muted mt8">${current.price ? price(current.price) + ' / month' : 'Custom pricing'} · renews automatically</p>
+          </div>
+          <div class="row" style="gap:8px">
+            ${state.user.tier !== 'free' ? `<button class="btn btn-outline btn-sm" data-action="cancel-sub">Cancel plan</button>` : ''}
+            <button class="btn btn-primary btn-sm" data-action="promo">Redeem promo code</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid g4">
+        ${tiers.map(t => {
+          const isCurrent = t.id === state.user.tier;
+          const idx = tiers.findIndex(x=>x.id===t.id);
+          const curIdx = tiers.findIndex(x=>x.id===state.user.tier);
+          const isUpgrade = idx > curIdx;
+          return `
+            <div class="card" style="${isCurrent?'border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-soft)':''}">
+              ${t.tag ? `<span class="badge badge-primary mb8">${t.tag}</span>` : `<div style="height:20px"></div>`}
+              <h3>${esc(t.name)}</h3>
+              <div class="mt8" style="font-size:26px;font-weight:800;letter-spacing:-.02em">
+                ${t.price === null ? 'Custom' : t.price === 0 ? 'Free' : price(t.price)}
+                ${t.price ? `<span class="small muted" style="font-weight:600">/mo</span>` : ''}
+              </div>
+              ${t.price && state.currency !== 'USD' ? `<div class="tiny muted mt8">${priceApprox(t.price)}</div>` : ''}
+              <ul class="small muted" style="padding-left:18px;margin:14px 0 0">
+                ${t.features.map(f=>`<li style="margin-bottom:6px">${esc(f)}</li>`).join('')}
+              </ul>
+              <div class="tiny muted mt12" style="min-height:32px">${esc(t.limit)}</div>
+              <button class="btn ${isCurrent ? 'btn-outline' : isUpgrade ? 'btn-primary' : 'btn-outline'} btn-block mt12"
+                      data-action="upgrade" data-tier="${t.id}" ${isCurrent ? 'disabled' : ''}>
+                ${isCurrent ? 'Current plan' : isUpgrade ? 'Upgrade' : 'Downgrade'}
+              </button>
+            </div>`;
+        }).join('')}
+      </div>
+
+      <div class="card mt16">
+        <h3 class="mb12">How billing works</h3>
+        <div class="grid g3">
+          <div><div class="bold small mb8">🍎 Apple IAP</div><p class="tiny muted">iOS purchases are processed by Apple. Manage or cancel in Settings → Apple ID → Subscriptions.</p></div>
+          <div><div class="bold small mb8">🤖 Google Play</div><p class="tiny muted">Android purchases are processed by Google Play. Manage in Play Store → Subscriptions.</p></div>
+          <div><div class="bold small mb8">🔄 Cross-device</div><p class="tiny muted">Your subscription follows your account, not your device. Sign in on any platform.</p></div>
+        </div>
+      </div>` : ''}
+
+    ${state.subscriptionTab === 'usage' ? `
+      <div class="card">
+        <h3 class="mb16">This billing period</h3>
+        ${usage.map(([label, used, limit])=>{
+          const pct = clamp(Math.round(used/limit*100), 0, 100);
+          const over = used > limit;
+          return `<div class="mb16">
+            <div class="row between small mb8">
+              <span class="muted">${label}</span>
+              <b style="${over?'color:var(--danger)':''}">${used} / ${limit}</b>
+            </div>
+            <div class="progress"><i style="width:${pct}%;${over?'background:var(--danger)':''}"></i></div>
+          </div>`;
+        }).join('')}
+        <div class="banner banner-info mt8"><span>ℹ️</span><span>Usage resets on the 15th of each month. Unused allowances don't roll over.</span></div>
+      </div>` : ''}
+
+    ${state.subscriptionTab === 'billing' ? `
+      <div class="card pad0">
+        <div style="padding:16px 16px 12px"><h3>Billing history</h3></div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Status</th><th>Receipt</th></tr></thead>
+            <tbody>
+              ${state.billingHistory.map(b=>`
+                <tr>
+                  <td>${esc(b.date)}</td>
+                  <td><b>${esc(b.desc)}</b><div class="tiny muted">${esc(b.id)}</div></td>
+                  <td>${price(b.amount)}</td>
+                  <td><span class="badge badge-success">${esc(b.status)}</span></td>
+                  <td><button class="btn btn-ghost btn-sm" data-action="receipt">⬇ PDF</button></td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>` : ''}
+
+    ${state.subscriptionTab === 'manage' ? `
+      <div class="grid g2">
+        <div class="card">
+          <h3 class="mb12">Renewal settings</h3>
+          <div class="row between mb16"><span class="small">Auto-renewal</span>
+            <div class="switch on" data-action="toggle-autorenew"></div></div>
+          <div class="row between mb16"><span class="small">Renewal date</span><b class="small">Oct 15, 2026</b></div>
+          <div class="row between mb16"><span class="small">Payment platform</span>
+            <span class="badge badge-info">🍎 Apple IAP</span></div>
+          <div class="divider"></div>
+          <button class="btn btn-outline btn-block mb8" data-action="change-payment">Change payment method</button>
+          <button class="btn btn-danger-soft btn-block" data-action="cancel-sub">Cancel subscription</button>
+        </div>
+        <div class="card">
+          <h3 class="mb12">Downgrade &amp; cancellation</h3>
+          <p class="small muted">If you downgrade, the change takes effect at the start of your next billing cycle — you keep premium features until then. No refunds are issued for partial periods.</p>
+          <div class="banner banner-info mt16"><span>ℹ️</span><span>Downgrading to Free keeps all your collaboration data. Paid features become read-only.</span></div>
+          <div class="divider"></div>
+          <div class="row between"><span class="small muted">Grace period on failed payments</span><b class="small">3 days</b></div>
+        </div>
+      </div>` : ''}`;
+}
+
+/* ============================================================
+   15. SETTINGS
+   ============================================================ */
+function viewSettings(){
+  return `
+    <div class="page-head">
+      <div><h1>Settings</h1><p class="muted small mt8">Account, security, privacy and preferences.</p></div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <h3 class="mb16">Account</h3>
+        <div class="col" style="gap:14px">
+          <div class="field"><label>Full name</label><input class="input" value="${esc(state.user.name)}"></div>
+          <div class="field"><label>Email</label><input class="input" value="${esc(state.user.email)}" disabled></div>
+          <div class="field"><label>Phone number</label><input class="input" placeholder="+1 (555) 000-0000"></div>
+          <div class="field"><label>Country</label>
+            <select class="select">${['US','GB','CA','AU','DE','FR','BR','IN','JP','AE'].map(c=>`<option ${c==='US'?'selected':''}>${c}</option>`).join('')}</select></div>
+        </div>
+        <button class="btn btn-primary mt16" data-action="save-settings">Save changes</button>
+      </div>
+
+      <div class="card">
+        <h3 class="mb16">Security</h3>
+        <div class="row between mb16">
+          <div><div class="bold small">Two-factor authentication</div>
+            <div class="tiny muted">Required for Premium tiers</div></div>
+          <div class="switch ${state.mfa?'on':''}" data-action="toggle-mfa"></div>
+        </div>
+        <div class="row between mb16">
+          <div><div class="bold small">Biometric unlock</div>
+            <div class="tiny muted">Face ID / fingerprint</div></div>
+          <div class="switch on" data-action="noop"></div>
+        </div>
+        <div class="divider"></div>
+        <button class="btn btn-outline btn-block mb8" data-action="change-password">Change password</button>
+        <button class="btn btn-outline btn-block" data-action="sessions">Active sessions (2)</button>
+      </div>
+
+      <div class="card">
+        <h3 class="mb16">Notifications</h3>
+        ${[['push','Push notifications','New messages, proposals and deal updates'],
+           ['email','Email digest','Weekly performance summary'],
+           ['weekly','Product updates','New features and tips']]
+          .map(([k,t,d])=>`
+            <div class="row between mb16">
+              <div><div class="bold small">${t}</div><div class="tiny muted">${d}</div></div>
+              <div class="switch ${state.notifPrefs[k]?'on':''}" data-action="toggle-notif" data-k="${k}"></div>
+            </div>`).join('')}
+      </div>
+
+      <div class="card">
+        <h3 class="mb16">Preferences</h3>
+        <div class="row between mb16">
+          <div><div class="bold small">Dark mode</div><div class="tiny muted">Easier on the eyes at night</div></div>
+          <div class="switch ${state.theme==='dark'?'on':''}" data-action="theme-toggle"></div>
+        </div>
+        <div class="field mb16"><label>Display currency</label>
+          <select class="select" onchange="state.currency=this.value;save();renderApp();toast('Currency set to '+this.value,'success')">
+            ${Object.entries(CURRENCIES).map(([k,v])=>`<option value="${k}" ${state.currency===k?'selected':''}>${k} — ${v.label}</option>`).join('')}
+          </select>
+          <span class="help">Prices are converted daily and adjusted for local purchasing power.</span>
+        </div>
+        <div class="field"><label>Language</label>
+          <select class="select"><option>English (US)</option><option>Português (BR)</option><option>हिन्दी</option><option>Español</option><option>日本語</option></select></div>
+      </div>
+
+      <div class="card">
+        <h3 class="mb16">Privacy &amp; data</h3>
+        <div class="row between mb16"><span class="small">Data export</span>
+          <button class="btn btn-outline btn-sm" data-action="export-data">Download my data</button></div>
+        <div class="row between mb16"><span class="small">Consent management</span>
+          <button class="btn btn-outline btn-sm" data-action="consent">Manage</button></div>
+        <div class="divider"></div>
+        <div class="banner banner-info mb16"><span>ℹ️</span><span>Exports are generated within 24 hours and remain valid for 7 days.</span></div>
+        <button class="btn btn-danger-soft btn-block" data-action="delete-account">Delete my account</button>
+        <p class="tiny muted mt8">30-day grace period. Collaboration and payment records are retained for 2 years for tax audits.</p>
+      </div>
+
+      <div class="card">
+        <h3 class="mb16">Demo &amp; testing</h3>
+        <p class="small muted mb16">This is a prototype. Use these controls to simulate real-world edge cases from the PRD.</p>
+        <button class="btn btn-outline btn-block mb8" data-action="demo-open">🧪 Open demo controls</button>
+        <button class="btn btn-danger-soft btn-block" data-action="reset-demo">↺ Reset all demo data</button>
+      </div>
+    </div>`;
+}
+
+/* ============================================================
+   16. ACTION HANDLERS
+   ============================================================ */
+const ACTIONS = {
+  /* ---- auth ---- */
+  'auth-role'(el){ state.role = el.dataset.role; state.authError=''; renderAuth(); },
+  'auth-mode'(){ state.authMode = state.authMode === 'signup' ? 'login' : 'signup'; state.authError=''; renderAuth(); },
+  'auth-back'(){ state.authMode = 'signup'; state.otpError=''; renderAuth(); },
+  'auth-submit'(){ handleAuthSubmit(); },
+  'otp-verify'(){ handleOtpVerify(); },
+  'otp-resend'(){ toast('New code sent. (Demo code: 123456)', 'success'); },
+  'social-auth'(el){ toast('Simulated ' + el.dataset.p + ' sign-in…', ''); setTimeout(()=>{ state.authForm.email='demo@company.com'; state.authMode='signup'; toast('Use email sign-up in this demo','warn'); }, 700); },
+
+  /* ---- onboarding ---- */
+  'onb-next'(){ onboardNext(); },
+  'onb-back'(){ if (state.onboardStep > 0){ state.onboardStep--; renderOnboarding(); } },
+  'pick-primary'(el){ state.onboarding.primaryNiche = el.dataset.n; renderOnboarding(); },
+  'pick-secondary'(el){
+    const n = el.dataset.n, arr = state.onboarding.secondary;
+    const i = arr.indexOf(n);
+    if (i > -1) arr.splice(i,1);
+    else if (arr.length < 2) arr.push(n);
+    else toast('Maximum 2 secondary niches', 'warn');
+    renderOnboarding();
+  },
+  'toggle-tos'(){ state.onboarding.tos = !state.onboarding.tos; renderOnboarding(); },
+  'upload-doc'(){ state.onboarding.docUploaded = true; renderOnboarding(); toast('Document uploaded — review in progress', 'success'); },
+
+  /* ---- nav ---- */
+  'nav'(el){ go(el.dataset.view); },
+  'logout'(){
+    state.user = null;
+    localStorage.removeItem(STORAGE_KEY);
+    state.authMode = 'signup';
+    state.onboardStep = 0;
+    renderAuth();
+    toast('Signed out');
+  },
+  'theme-toggle'(){
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', state.theme);
+    save(); renderApp();
+  },
+  'menu-toggle'(){ $('#userMenu')?.classList.toggle('hidden'); },
+  'more-open'(){
+    openModal({
+      title:'More',
+      body:`<div class="col" style="gap:4px">
+        ${NAV_MORE.map(n=>`<button class="nav-item" data-action="nav" data-view="${n.id}" data-close><span class="ico">${n.icon}</span>${n.label}</button>`).join('')}
+        <div class="divider"></div>
+        <button class="nav-item" data-action="demo-open" data-close><span class="ico">🧪</span>Demo controls</button>
+        <button class="nav-item" data-action="logout" data-close><span class="ico">↩︎</span>Sign out</button>
+      </div>`
+    });
+  },
+  'notif-open'(){
+    openModal({
+      title:'Notifications',
+      body: state.notifs.length ? state.notifs.map(n=>`
+        <div class="row mb12" style="gap:12px;align-items:flex-start">
+          <div class="avatar sm" style="background:var(--surface-3);color:var(--text)">${n.icon}</div>
+          <div class="grow"><div class="row between"><b class="small">${esc(n.title)}</b>${n.unread?'<span class="badge badge-primary">New</span>':''}</div>
+            <div class="tiny muted">${esc(n.body)}</div>
+            <div class="tiny muted mt8">${esc(n.at)}</div></div>
+        </div>`).join('') : '<p class="muted">No notifications</p>',
+      footer:`<button class="btn btn-outline" data-close>Close</button><button class="btn btn-primary" data-action="mark-read" data-close>Mark all read</button>`
+    });
+  },
+  'mark-read'(){ state.notifs.forEach(n=>n.unread=false); save(); renderApp(); toast('All notifications marked read','success'); },
+
+  /* ---- social ---- */
+  'connect-social'(el){
+    const p = el.dataset.p;
+    const names = {instagram:'Instagram', tiktok:'TikTok', youtube:'YouTube'};
+    toast('Opening ' + names[p] + ' OAuth…');
+    setTimeout(() => {
+      state.socials[p].connected = true;
+      state.socials[p].status = 'connected';
+      state.socials[p].synced = 'just now';
+      state.socials[p].followers = p === 'instagram' ? 184210 : p === 'tiktok' ? 96400 : 24800;
+      save(); renderApp();
+      toast('✓ ' + names[p] + ' connected — metrics synced', 'success');
+    }, 1200);
+  },
+  'disconnect-social'(el){
+    const p = el.dataset.p;
+    state.socials[p].connected = false;
+    state.socials[p].status = 'disconnected';
+    save(); renderApp();
+    toast('Disconnected. We stopped syncing ' + p + ' metrics.', 'warn');
+  },
+  'sync-all'(){
+    if (state.rateLimited){
+      toast('⏳ Rate limited — retrying in 60 seconds', 'warn');
+      return;
+    }
+    toast('Syncing metrics from connected platforms…');
+    setTimeout(() => {
+      Object.keys(state.socials).forEach(k => {
+        if (state.socials[k].connected){ state.socials[k].synced = 'just now'; }
+      });
+      state.staleMetrics = false;
+      save(); renderApp();
+      toast('✓ All metrics up to date', 'success');
+    }, 1400);
+  },
+
+  /* ---- discover ---- */
+  'save-campaign'(el){
+    const id = el.dataset.id;
+    const i = state.watchlist.indexOf(id);
+    if (i > -1){ state.watchlist.splice(i,1); toast('Removed from watchlist'); }
+    else { state.watchlist.push(id); toast('★ Saved to watchlist', 'success'); }
+    save(); renderContent();
+  },
+  'outreach'(el){
+    if (state.user.tier === 'free' && state.usage.outreachThisWeek >= 1){
+      return openPaywall('You\'ve used your 1 free outreach this week.');
+    }
+    const c = state.campaigns.find(x => x.id === el.dataset.id);
+    openModal({
+      title:'Send proposal',
+      body:`
+        <div class="card" style="background:var(--surface-2)">
+          <b>${esc(c.brand)}</b>
+          <div class="small muted">${esc(c.title)}</div>
+        </div>
+        <div class="field mt16"><label>Your rate</label><input class="input" id="propRate" type="number" value="2400"></div>
+        <div class="field mt16"><label>Deliverables</label><input class="input" value="${esc(c.deliverables.join(', '))}"></div>
+        <div class="field mt16"><label>Message</label>
+          <textarea class="textarea">Hi ${esc(c.brand)} team — I'd love to collaborate on this campaign. My audience (${fmtN(184210)} followers, 4.2% ER) is a strong fit for your target demographic.</textarea></div>`,
+      footer:`<button class="btn btn-outline" data-close>Cancel</button>
+              <button class="btn btn-primary" data-action="send-proposal" data-id="${c.id}">Send proposal</button>`
+    });
+  },
+  'send-proposal'(){
+    state.usage.outreachThisWeek++;
+    closeModal();
+    save(); renderContent();
+    toast('✓ Proposal sent — you\'ll be notified when they respond', 'success', 4000);
+  },
+  'select-influencer'(el){
+    const id = el.dataset.id;
+    const i = state.selectedInfluencers.indexOf(id);
+    if (i > -1) state.selectedInfluencers.splice(i,1);
+    else state.selectedInfluencers.push(id);
+    renderContent();
+  },
+  'clear-selection'(){ state.selectedInfluencers = []; renderContent(); },
+  'toggle-verified'(){ state.filters.verifiedOnly = !state.filters.verifiedOnly; renderContent(); },
+  'suggest-filter'(){ state.filters = {...state.filters, niche:'all', location:'all', minER:0, maxFollowers:2000000}; renderContent(); toast('Filters relaxed'); },
+  'save-list'(){ toast('💾 List saved to your workspace', 'success'); },
+  'view-influencer'(el){ openInfluencerProfile(el.dataset.id); },
+  'view-campaign'(el){
+    const c = state.campaigns.find(x => x.id === el.dataset.id);
+    openModal({
+      title: esc(c.title),
+      size:'lg',
+      body:`
+        <div class="row" style="gap:10px" class="mb16">
+          <div class="avatar" style="background:linear-gradient(135deg,#0ea5e9,#6366f1)">${esc(c.brand.slice(0,2).toUpperCase())}</div>
+          <div><b>${esc(c.brand)}</b> ${c.verified?'<span class="badge badge-success">✓ Verified</span>':'<span class="badge badge-warn">Pending</span>'}
+            <div class="tiny muted">${esc(c.category)} · ${c.applicants} applicants</div></div>
+        </div>
+        <p class="small muted mt16">${esc(c.description)}</p>
+        <div class="divider"></div>
+        <div class="grid g2">
+          <div><div class="tiny muted">Budget</div><b>${esc(c.rate)}</b></div>
+          <div><div class="tiny muted">Total budget</div><b>${money(c.budget)}</b></div>
+          <div><div class="tiny muted">Deadline</div><b>${esc(c.deadline)}</b></div>
+          <div><div class="tiny muted">Match</div><b>${c.match}%</b></div>
+        </div>
+        <div class="divider"></div>
+        <div class="bold small mb8">Deliverables</div>
+        <div class="row wrap" style="gap:6px">${c.deliverables.map(d=>`<span class="badge">${esc(d)}</span>`).join('')}</div>`,
+      footer:`<button class="btn btn-outline" data-close>Close</button>
+              <button class="btn btn-primary" data-action="outreach" data-id="${c.id}" data-close>Send proposal</button>`
+    });
+  },
+  'bulk-outreach'(){ openBulkOutreach(); },
+  'send-bulk'(){
+    const n = state.selectedInfluencers.length;
+    const est = state.selectedInfluencers.reduce((a,id)=>{ const i = state.influencers.find(x=>x.id===id); return a + (i?i.rate:0); }, 0);
+    closeModal();
+    toast(`Queued ${n} outreach notifications…`);
+    setTimeout(() => {
+      state.usage.outreachThisWeek += n;
+      state.selectedInfluencers = [];
+      save(); renderContent();
+      toast(`✓ Sent to ${n} influencers. Monitor responses in your dashboard.`, 'success', 4500);
+    }, 1200);
+  },
+
+  /* ---- collaborations ---- */
+  'collab-tab'(el){ state.collabTab = el.dataset.t; renderContent(); },
+  'collab-open'(el){
+    const c = state.collabs.find(x => x.id === el.dataset.id);
+    if (!c) return;
+    const delivered = Math.round(c.deliverables.length * c.progress / 100);
+    openModal({
+      title: esc(c.campaign),
+      size:'lg',
+      body:`
+        <div class="row between mb16">
+          <div class="row" style="gap:10px">
+            <div class="avatar">${esc(c.counterpart.slice(0,2).toUpperCase())}</div>
+            <div><b>${esc(c.counterpart)}</b><div class="tiny muted">Created ${esc(c.created)}</div></div>
+          </div>
+          ${statusBadge(c.status)}
+        </div>
+
+        <div class="grid g3 mb16">
+          <div class="card flat" style="background:var(--surface-2)"><div class="tiny muted">Agreed rate</div><b>${money(c.rate)}</b></div>
+          <div class="card flat" style="background:var(--surface-2)"><div class="tiny muted">Due date</div><b>${esc(c.due)}</b></div>
+          <div class="card flat" style="background:var(--surface-2)"><div class="tiny muted">Payment</div><b style="text-transform:capitalize">${esc(c.payment)}</b></div>
+        </div>
+
+        <div class="bold small mb8">Deliverable checklist</div>
+        ${c.deliverables.map((d,i)=>`
+          <div class="row between" style="padding:10px 0;border-bottom:1px solid var(--border)">
+            <div class="row" style="gap:10px">
+              <div class="checkbox ${i<delivered?'on':''}">${i<delivered?'✓':''}</div>
+              <span class="small">${esc(d)}</span>
+            </div>
+            <span class="badge ${i<delivered?'badge-success':'badge-warn'}">${i<delivered?'Published':'Pending'}</span>
+          </div>`).join('')}
+
+        <div class="mt16">
+          <div class="row between small mb8"><span class="muted">Overall progress</span><b>${c.progress}%</b></div>
+          <div class="progress"><i style="width:${c.progress}%"></i></div>
+        </div>
+
+        <div class="banner banner-info mt16"><span>🔒</span><span>Payment is held in escrow for 48 hours after final deliverable publication, allowing time for metric verification and disputes.</span></div>`,
+      footer:`<button class="btn btn-outline" data-close>Close</button>
+              <button class="btn btn-primary" data-action="nav" data-view="messages" data-close>Open messages</button>`
+    });
+  },
+  'open-collab-thread'(el){
+    const c = state.collabs.find(x => x.id === el.dataset.id);
+    const t = state.threads.find(x => x.collabId === el.dataset.id);
+    if (t){ state.activeThread = t.id; state.messagesPane = 'chat'; go('messages'); }
+    else toast('No message thread for this collaboration yet', 'warn');
+  },
+
+  /* ---- messaging ---- */
+  'open-thread'(el){
+    state.activeThread = el.dataset.id;
+    state.messagesPane = 'chat';
+    const t = state.threads.find(x=>x.id===el.dataset.id);
+    if (t) t.unread = 0;
+    save(); renderApp();
+  },
+  'msg-back'(){ state.messagesPane = 'list'; renderApp(); },
+  'send-message'(){
+    const input = $('#msgInput');
+    const text = (input?.value || '').trim();
+    if (!text) return;
+    const t = state.threads.find(x => x.id === state.activeThread);
+    t.messages.push({from:'me', type:'text', text, at:'Just now'});
+    save();
+    renderContent();
+    setTimeout(() => {
+      t.messages.push({from:'them', type:'text', text:'Thanks for the update! Let me check with the team and get back to you.', at:'Just now'});
+      save(); renderContent();
+    }, 1600);
+  },
+  'accept-proposal'(){
+    const t = state.threads.find(x => x.id === state.activeThread);
+    t.messages.push({from:'me', type:'text', text:'✅ Accepting final terms. Looking forward to working together!', at:'Just now'});
+    const c = state.collabs.find(x => x.id === t.collabId);
+    if (c){ c.status = 'accepted'; c.progress = Math.max(c.progress, 20); }
+    save(); renderContent();
+    toast('✓ Terms accepted — collaboration marked "Negotiated · Pending Contract"', 'success', 4200);
+  },
+  'decline-proposal'(){
+    const t = state.threads.find(x => x.id === state.activeThread);
+    t.messages.push({from:'me', type:'text', text:'Thanks for reaching out, but I\'ll have to pass on this one.', at:'Just now'});
+    const c = state.collabs.find(x => x.id === t.collabId);
+    if (c) c.status = 'declined';
+    save(); renderContent();
+    toast('Proposal declined', 'warn');
+  },
+  'open-counter'(){ openCounterForm(); },
+  'submit-counter'(){
+    const rate = +$('#ctRate').value || 0;
+    const delivs = ($('#ctDelivs').value || '').split(',').map(s=>s.trim()).filter(Boolean);
+    const terms = $('#ctTerms').value || '';
+    const t = state.threads.find(x => x.id === state.activeThread);
+    t.messages.push({from:'me', type:'counter', text:'Counter-proposal', at:'Just now',
+      data:{rate, deliverables: delivs.length ? delivs : ['1 Instagram Post'], terms: terms || '100% on delivery'}});
+    const c = state.collabs.find(x => x.id === t.collabId);
+    if (c){ c.status = 'negotiating'; c.rate = rate; c.progress = Math.max(c.progress, 30); }
+    closeModal();
+    save(); renderContent();
+    toast('⇄ Counter-proposal sent', 'success');
+  },
+
+  /* ---- subscription ---- */
+  'sub-tab'(el){ state.subscriptionTab = el.dataset.t; renderContent(); },
+  'upgrade'(el){
+    const tierId = el.dataset.tier;
+    const tier = TIERS[state.user.role].find(t => t.id === tierId);
+    closeModal();
+    if (!tier) return;
+    if (tier.price === null){
+      return openModal({
+        title:'Contact sales',
+        body:`<p class="muted small">Enterprise plans are tailored to your organization. Our team will reach out within one business day.</p>
+              <div class="field mt16"><label>Work email</label><input class="input" value="${esc(state.user.email)}"></div>
+              <div class="field mt16"><label>Monthly influencer budget</label>
+                <select class="select"><option>$10K – $50K</option><option>$50K – $250K</option><option>$250K+</option></select></div>`,
+        footer:`<button class="btn btn-outline" data-close>Cancel</button><button class="btn btn-primary" data-action="contact-sales" data-close>Request demo</button>`
+      });
+    }
+    openMockIAP(tier);
+  },
+  'mock-pay'(el){
+    const tier = TIERS[state.user.role].find(t => t.id === el.dataset.tier);
+    const btn = el;
+    btn.disabled = true; btn.textContent = 'Processing…';
+    setTimeout(() => {
+      state.user.tier = tier.id;
+      state.billingHistory.unshift({
+        date: new Date().toISOString().slice(0,10),
+        desc: `${tier.name} — Monthly`,
+        amount: tier.price,
+        status:'Paid',
+        id:'APL-' + Math.floor(Math.random()*90000000+10000000)
+      });
+      save(); closeModal(); go(state.view);
+      toast(`🎉 Upgraded to ${tier.name}! All features unlocked.`, 'success', 4200);
+    }, 1500);
+  },
+  'promo'(){
+    openModal({
+      title:'Redeem promo code',
+      body:`<div class="field"><label>Promo / affiliate code</label>
+        <input class="input" id="promoCode" placeholder="CREATOR20"></div>
+        <p class="help mt8">Try <b>CREATOR20</b> for 20% off your first 3 months.</p>`,
+      footer:`<button class="btn btn-outline" data-close>Cancel</button><button class="btn btn-primary" data-action="apply-promo" data-close>Apply</button>`
+    });
+  },
+  'apply-promo'(){ toast('✓ Promo applied — 20% off for 3 months', 'success'); },
+  'cancel-sub'(){
+    openModal({
+      title:'Cancel subscription?',
+      body:`<p class="small muted">Your plan will remain active until the end of the current billing period. You'll keep premium features until then.</p>
+        <div class="card mt16" style="background:var(--surface-2)">
+          <div class="row between small"><span class="muted">Access until</span><b>Oct 15, 2026</b></div>
+          <div class="row between small mt8"><span class="muted">Refund</span><b>No partial refunds</b></div>
+        </div>
+        <div class="field mt16"><label>Reason (optional)</label>
+          <select class="select"><option>Too expensive</option><option>Not using enough</option><option>Missing features</option><option>Switching platform</option><option>Other</option></select></div>`,
+      footer:`<button class="btn btn-outline" data-close>Keep plan</button>
+              <button class="btn btn-danger" data-action="confirm-cancel" data-close>Cancel subscription</button>`
+    });
+  },
+  'confirm-cancel'(){
+    state.user.tier = 'free';
+    save(); renderApp();
+    toast('Subscription cancelled. Access continues until Oct 15, 2026.', 'warn', 5000);
+  },
+  'fix-payment'(){
+    state.gracePeriod = 0;
+    save(); renderApp();
+    toast('✓ Payment method updated — subscription reactivated', 'success');
+  },
+  'toggle-autorenew'(){ toast('Auto-renewal preference updated'); },
+  'change-payment'(){ toast('Opening App Store subscription management…'); },
+  'receipt'(){ toast('⬇ Receipt downloaded (demo)'); },
+  'contact-sales'(){ toast('✓ Request sent — our sales team will contact you', 'success'); },
+
+  /* ---- profile ---- */
+  'profile-tab'(el){ state.profileTab = el.dataset.t; renderContent(); },
+  'toggle-rates-public'(){ state.ratesPublic = !state.ratesPublic; save(); renderContent(); toast(state.ratesPublic?'Rate card is now public':'Rate card is now private'); },
+  'toggle-rates-negotiable'(){ state.ratesNegotiable = !state.ratesNegotiable; save(); renderContent(); },
+  'toggle-rate-item'(el){ const id = el.dataset.id; state.rates[id].on = !state.rates[id].on; renderContent(); },
+  'save-rates'(){ save(); toast('✓ Rate card saved — brands see updated pricing immediately', 'success'); },
+  'verify-id'(){
+    openModal({
+      title:'Identity verification',
+      body:`<p class="small muted">Upload a government-issued ID and take a selfie. Verification typically completes within 24 hours.</p>
+        <div class="card mt16" style="background:var(--surface-2);border-style:dashed;text-align:center;padding:24px">
+          <div style="font-size:30px">🪪</div>
+          <div class="small bold mt8">government_id.pdf</div>
+        </div>
+        <div class="card mt12" style="background:var(--surface-2);border-style:dashed;text-align:center;padding:24px">
+          <div style="font-size:30px">🤳</div>
+          <div class="small bold mt8">selfie.jpg</div>
+        </div>`,
+      footer:`<button class="btn btn-outline" data-close>Cancel</button><button class="btn btn-primary" data-action="submit-verify" data-close>Submit for review</button>`
+    });
+  },
+  'submit-verify'(){ state.user.verificationStatus = 'approved'; save(); renderApp(); toast('✓ Identity verified — badge added to your profile', 'success'); },
+  'edit-profile'(){ toast('Profile editor opened (demo)'); },
+  'preview-public'(){ toast('Showing public preview as brands see it'); },
+  'toggle-availability'(){ toast('Availability updated'); },
+  'edit-brand'(){ toast('Brand profile editor opened (demo)'); },
+  'invite-member'(){
+    openModal({
+      title:'Invite team member',
+      body:`<div class="field"><label>Work email</label><input class="input" placeholder="name@lumenskin.com"></div>
+        <div class="field mt16"><label>Role</label>
+          <select class="select"><option>Campaign Manager</option><option>Analyst</option><option>Admin</option></select></div>`,
+      footer:`<button class="btn btn-outline" data-close>Cancel</button><button class="btn btn-primary" data-action="send-invite" data-close>Send invite</button>`
+    });
+  },
+  'send-invite'(){ toast('✓ Invitation sent', 'success'); },
+  'member-menu'(){ toast('Role & permissions menu (demo)'); },
+  'upload-asset'(){ toast('Asset uploaded'); },
+  'resubmit-doc'(){ toast('Document re-uploaded — back in review queue'); },
+  'noop'(){},
+  'save-settings'(){ toast('✓ Settings saved', 'success'); },
+  'toggle-mfa'(){ state.mfa = !state.mfa; save(); renderApp(); toast(state.mfa?'Two-factor authentication enabled':'Two-factor authentication disabled', state.mfa?'success':'warn'); },
+  'toggle-notif'(el){ const k = el.dataset.k; state.notifPrefs[k] = !state.notifPrefs[k]; save(); renderApp(); },
+  'change-password'(){ toast('Password reset email sent'); },
+  'sessions'(){
+    openModal({
+      title:'Active sessions',
+      body:`${[['iPhone 15 Pro · iOS 18','San Francisco, US','Current session'],
+              ['Pixel 8 · Android 15','San Francisco, US','2 days ago']].map(([d,l,t])=>`
+        <div class="row between mb12"><div><b class="small">${d}</b><div class="tiny muted">${l} · ${t}</div></div>
+        <button class="btn btn-ghost btn-sm">Revoke</button></div>`).join('')}`,
+      footer:`<button class="btn btn-outline" data-close>Close</button>`
+    });
+  },
+  'consent'(){
+    openModal({
+      title:'Consent management',
+      body:`${['Follower counts','Audience demographics','Engagement metrics','Public profile data'].map(x=>`
+        <div class="row between mb16"><span class="small">${x}</span><div class="switch on" data-action="noop"></div></div>`).join('')}
+        <div class="banner banner-info"><span>ℹ️</span><span>Revoking consent for a data category immediately stops collection. Historical aggregates are purged within 7 days.</span></div>`,
+      footer:`<button class="btn btn-primary" data-close>Save preferences</button>`
+    });
+  },
+  'export-data'(){
+    const payload = {
+      exported_at: new Date().toISOString(),
+      profile: state.user,
+      social_accounts: state.socials,
+      collaborations: state.collabs,
+      rate_card: state.rates,
+      billing_history: state.billingHistory
+    };
+    downloadFile('collabry-data-export.json', JSON.stringify(payload, null, 2), 'application/json');
+    toast('⬇ Data export downloaded', 'success');
+  },
+  'export-report'(){
+    const rows = [['Campaign','Counterpart','Rate','Status','Progress']]
+      .concat(state.collabs.map(c=>[c.campaign, c.counterpart, c.rate, c.status, c.progress + '%']));
+    downloadFile('collabry-report.csv', rows.map(r=>r.join(',')).join('\n'), 'text/csv');
+    toast('⬇ Report downloaded', 'success');
+  },
+  'delete-account'(){
+    openModal({
+      title:'Delete your account?',
+      body:`<div class="banner banner-danger mb16"><span>⚠️</span><span>This action cannot be undone after the 30-day grace period.</span></div>
+        <ul class="small muted" style="padding-left:18px">
+          <li>Your profile is soft-deleted immediately</li>
+          <li>Social platform access tokens are revoked instantly</li>
+          <li>Collaboration and payment records retained 2 years (tax audit)</li>
+          <li>Hard delete occurs after 30 days</li>
+        </ul>
+        <div class="field mt16"><label>Type DELETE to confirm</label><input class="input" id="delConfirm" placeholder="DELETE"></div>`,
+      footer:`<button class="btn btn-outline" data-close>Keep my account</button>
+              <button class="btn btn-danger" data-action="confirm-delete">Delete account</button>`
+    });
+  },
+  'confirm-delete'(){
+    const v = ($('#delConfirm')?.value || '').trim().toUpperCase();
+    if (v !== 'DELETE') return toast('Please type DELETE to confirm', 'warn');
+    closeModal();
+    localStorage.removeItem(STORAGE_KEY);
+    state.user = null;
+    renderAuth();
+    toast('Account deleted. You have 30 days to restore it.', 'warn', 5000);
+  },
+  'reset-demo'(){ resetDemo(); },
+
+  /* ---- demo controls ---- */
+  'demo-open'(){ openDemoPanel(); },
+  'demo-ratelimit'(){
+    state.rateLimited = true; save(); renderApp();
+    toast('⏳ Simulated 429 rate limit from Instagram API', 'warn', 4000);
+    setTimeout(()=>{ state.rateLimited = false; save(); if(state.user?.onboarded) renderApp(); toast('✓ Sync resumed', 'success'); }, 6000);
+  },
+  'demo-offline'(){
+    state.offline = !state.offline; save(); renderApp();
+    toast(state.offline ? '📡 Offline mode enabled' : '✓ Back online', state.offline ? 'warn' : 'success');
+  },
+  'demo-token'(){
+    state.socials.instagram.status = 'expired';
+    state.socials.instagram.connected = false;
+    save(); renderApp();
+    toast('Your Instagram connection has expired. Reconnect in Settings.', 'danger', 4500);
+  },
+  'demo-mismatch'(){
+    state.socials.instagram.status = 'review';
+    save(); renderApp();
+    toast('⚠️ Follower mismatch flagged — profile under review', 'warn', 4500);
+  },
+  'demo-stale'(){
+    state.staleMetrics = true;
+    Object.keys(state.socials).forEach(k => { if (state.socials[k].connected) state.socials[k].synced = '3 hours ago'; });
+    save(); renderApp();
+    toast('Metrics marked as stale (2+ hours old)', 'warn');
+  },
+  'demo-grace'(){
+    state.gracePeriod = (state.gracePeriod % 4) + 1;
+    if (state.gracePeriod === 4){ state.user.tier = 'free'; state.gracePeriod = 0; toast('Hard paywall activated — premium features locked', 'danger', 4500); }
+    else toast(`Payment failure simulated — grace period day ${state.gracePeriod}`, 'warn', 3500);
+    save(); renderApp();
+  },
+  'demo-inbox'(){
+    for (let i = 0; i < 5; i++){
+      state.threads.unshift({
+        id: uid('t'), name: 'Brand ' + (i+1), role:'brand', collabId:'col1', unread:1, avatar:'B'+(i+1),
+        messages:[{from:'them', type:'text', text:'We\'d love to collaborate with you on an upcoming campaign!', at:'Just now'}]
+      });
+    }
+    state.notifs.unshift({id:uid('n'), icon:'💬', title:'50 new collaboration requests', body:'Your inbox is filling up fast.', at:'Just now', unread:true});
+    save(); renderApp();
+    toast('📥 5 new inbound requests simulated', 'success');
+  },
+  'demo-empty'(){
+    state.filters = {...state.filters, niche:'Gaming', location:'JP', minER:9, maxFollowers:1000};
+    state.view = 'discover'; renderApp();
+    toast('Empty search state triggered', 'warn');
+  },
+  'demo-clear'(){
+    state.rateLimited = false; state.offline = false; state.staleMetrics = false; state.gracePeriod = 0;
+    state.socials.instagram.status = 'connected'; state.socials.instagram.connected = true;
+    save(); renderApp();
+    toast('✓ All simulated states cleared', 'success');
+  },
+
+  /* ---- misc ---- */
+  'create-campaign'(){ openCampaignWizard(); },
+  'open-campaign-from-wizard'(el){
+    closeModal();
+    toast('✓ Campaign saved as Draft', 'success');
+  }
+};
+
+/* ============================================================
+   17. COMPOSITE FLOWS
+   ============================================================ */
+function openPaywall(reason){
+  const tiers = TIERS[state.user.role];
+  const rec = tiers[1];
+  openModal({
+    title:'🔒 Upgrade to keep going',
+    size:'lg',
+    body:`
+      <div class="banner banner-warn mb16"><span>⚡</span><span>${esc(reason)}</span></div>
+      <div class="grid g2" style="gap:12px">
+        ${tiers.filter(t=>t.price !== null && t.price > 0).map(t=>`
+          <div class="card ${t.id===rec.id?'':'flat'}" style="${t.id===rec.id?'border-color:var(--primary)':''}">
+            ${t.tag?`<span class="badge badge-primary mb8">${t.tag}</span>`:'<div style="height:20px"></div>'}
+            <h3>${esc(t.name)}</h3>
+            <div class="mt8" style="font-size:22px;font-weight:800">${price(t.price)}<span class="small muted">/mo</span></div>
+            <ul class="small muted" style="padding-left:18px;margin:12px 0 0">
+              ${t.features.slice(0,4).map(f=>`<li style="margin-bottom:4px">${esc(f)}</li>`).join('')}
+            </ul>
+            <button class="btn ${t.id===rec.id?'btn-primary':'btn-outline'} btn-block mt12" data-action="upgrade" data-tier="${t.id}">Choose ${esc(t.name)}</button>
+          </div>`).join('')}
+      </div>
+      <p class="tiny muted mt16 center">Billed through Apple App Store or Google Play. Cancel anytime.</p>`,
+    footer:`<button class="btn btn-ghost" data-close>Not now</button>`
+  });
+}
+
+function openMockIAP(tier){
+  const platform = /Android/i.test(navigator.userAgent) ? 'Google Play' : 'App Store';
+  openModal({
+    title:'Confirm subscription',
+    body:`
+      <div class="card" style="background:var(--surface-2)">
+        <div class="row between mb12"><span class="muted small">Plan</span><b>${esc(tier.name)} — Monthly</b></div>
+        <div class="row between mb12"><span class="muted small">Price</span><b>${price(tier.price)}/month</b></div>
+        ${state.currency !== 'USD' ? `<div class="row between mb12"><span class="muted small">USD equivalent</span><b>${money(tier.price)}</b></div>` : ''}
+        <div class="row between"><span class="muted small">Payment via</span><b>${platform === 'App Store' ? '🍎 App Store' : '🤖 Google Play'}</b></div>
+      </div>
+      <div class="banner banner-info mt16"><span>ℹ️</span><span>Auto-renewable. Renews monthly unless cancelled at least 24 hours before the period ends. Manage in your ${platform} account settings.</span></div>
+      <p class="tiny muted mt16">Pro-rata credit applies if you upgrade mid-cycle. Downgrades take effect at your next billing date.</p>`,
+    footer:`<button class="btn btn-outline" data-close>Cancel</button>
+            <button class="btn btn-primary" data-action="mock-pay" data-tier="${tier.id}">Subscribe · ${price(tier.price)}</button>`
+  });
+}
+
+function openBulkOutreach(){
+  const sel = state.selectedInfluencers.map(id => state.influencers.find(i => i.id === id)).filter(Boolean);
+  if (!sel.length) return toast('Select at least one influencer', 'warn');
+  const est = sel.reduce((a,i)=>a+i.rate,0);
+  const budget = 45000;
+  const overBudget = est > budget;
+
+  openModal({
+    title:`Bulk outreach · ${sel.length} influencers`,
+    size:'lg',
+    body:`
+      <div class="field mb16"><label>Message template</label>
+        <select class="select" id="tplSel" onchange="updateTemplatePreview()">
+          <option value="pro">Professional Outreach</option>
+          <option value="friendly">Friendly Collaboration</option>
+          <option value="exclusive">Exclusive Opportunity</option>
+          <option value="custom">Custom message…</option>
+        </select>
+      </div>
+
+      <div class="field mb16"><label>Message</label>
+        <textarea class="textarea" id="tplBody">Hi {influencer_name}, we're launching a new campaign in the {niche} space and would love to collaborate with you on {campaign_name}. Deliverables: {deliverables}. Let us know if you're interested!</textarea>
+        <span class="help">Variables: {influencer_name} · {niche} · {campaign_name} · {deliverables}</span>
+      </div>
+
+      <div class="bold small mb8">Preview (3 samples)</div>
+      <div class="card flat" style="background:var(--surface-2)">
+        ${sel.slice(0,3).map(i=>`
+          <div class="mb12" style="padding-bottom:12px;border-bottom:1px solid var(--border)">
+            <div class="tiny muted mb8">→ ${esc(i.name)} (${esc(i.handle)})</div>
+            <div class="small" id="pv-${i.id}"></div>
+          </div>`).join('')}
+        ${sel.length > 3 ? `<div class="tiny muted">+ ${sel.length-3} more recipients</div>` : ''}
+      </div>
+
+      ${overBudget ? `
+        <div class="banner banner-warn mt16"><span>⚠️</span>
+          <div><b>Budget exceeded.</b>
+          <div class="small">Selected influencers will cost ~${money(est)} (exceeds your ${money(budget)} campaign budget by ${money(est-budget)}).</div></div>
+        </div>` : `
+        <div class="banner banner-info mt16"><span>💰</span><span>Estimated cost: <b>${money(est)}</b> · within your ${money(budget)} budget.</span></div>`}`,
+    footer:`<button class="btn btn-outline" data-close>Cancel</button>
+            <button class="btn ${overBudget?'btn-outline':'btn-primary'}" data-action="send-bulk">${overBudget?'Adjust & send':'Send to all'}</button>`,
+    onMount(){
+      const render = () => {
+        const body = $('#tplBody')?.value || '';
+        sel.slice(0,3).forEach(i=>{
+          const el = $('#pv-' + i.id);
+          if (el) el.textContent = body
+            .replace('{influencer_name}', i.name)
+            .replace('{niche}', i.niches[0])
+            .replace('{campaign_name}', 'Q4 Fitness Apparel Push')
+            .replace('{deliverables}', '2 Instagram posts + 1 TikTok video');
+        });
+      };
+      window.updateTemplatePreview = render;
+      $('#tplBody')?.addEventListener('input', render);
+      const tpls = {
+        pro:'Hi {influencer_name}, we\'re launching a new campaign in the {niche} space and would love to collaborate with you on {campaign_name}. Deliverables: {deliverables}. Let us know if you\'re interested!',
+        friendly:'Hey {influencer_name}! 👋 We\'ve been following your {niche} content and think you\'d be perfect for {campaign_name}. Up for it? Deliverables: {deliverables}',
+        exclusive:'{influencer_name}, we\'re hand-picking a small group of {niche} creators for an exclusive {campaign_name} partnership. Deliverables: {deliverables}. Interested?'
+      };
+      $('#tplSel')?.addEventListener('change', e => {
+        if (e.target.value !== 'custom' && $('#tplBody')) $('#tplBody').value = tpls[e.target.value];
+        render();
+      });
+      render();
+    }
+  });
+}
+
+function openCounterForm(){
+  const t = state.threads.find(x => x.id === state.activeThread);
+  const lastProp = [...t.messages].reverse().find(m => m.type === 'proposal' || m.type === 'counter');
+  openModal({
+    title:'⇄ Send counter-proposal',
+    body:`
+      <div class="card" style="background:var(--surface-2)">
+        <div class="tiny muted mb8">Their proposal</div>
+        <div class="row between small"><span class="muted">Rate</span><b>${money(lastProp?.data.rate || 3000)}</b></div>
+        <div class="row between small mt8"><span class="muted">Deliverables</span><b>${esc((lastProp?.data.deliverables || []).join(', '))}</b></div>
+      </div>
+      <div class="field mt16"><label>Your rate (USD)</label>
+        <input class="input" id="ctRate" type="number" value="${(lastProp?.data.rate || 3000) + 1000}"></div>
+      <div class="field mt16"><label>Deliverables (comma separated)</label>
+        <input class="input" id="ctDelivs" value="${esc((lastProp?.data.deliverables || ['2 Instagram Posts']).join(', '))}"></div>
+      <div class="field mt16"><label>Payment terms</label>
+        <select class="select" id="ctTerms">
+          <option>50% upfront, 50% on delivery</option>
+          <option>100% on delivery</option>
+          <option>100% upfront</option>
+          <option>Net 30 after publication</option>
+        </select></div>
+      <div class="field mt16"><label>Note</label>
+        <textarea class="textarea">Happy to adjust deliverables — my audience skews higher-intent than average, which justifies the rate change.</textarea></div>`,
+    footer:`<button class="btn btn-outline" data-close>Cancel</button>
+            <button class="btn btn-primary" data-action="submit-counter">Send counter-proposal</button>`
+  });
+}
+
+function openInfluencerProfile(id){
+  const i = state.influencers.find(x => x.id === id);
+  if (!i) return;
+  const sel = state.selectedInfluencers.includes(id);
+  openModal({
+    title: esc(i.name),
+    size:'lg',
+    body:`
+      <div class="row" style="gap:14px;align-items:flex-start">
+        <div class="avatar lg">${esc(i.name.split(' ').map(w=>w[0]).join(''))}</div>
+        <div class="grow">
+          <div class="row" style="gap:8px">
+            <b>${esc(i.handle)}</b>
+            ${i.verified?'<span class="badge badge-success">✓ Verified</span>':'<span class="badge badge-warn">Unverified</span>'}
+          </div>
+          <div class="tiny muted mt8">${esc(i.niches.join(' · '))} · ${esc(i.loc)} · ★ ${i.rating}</div>
+          <div class="row wrap mt12" style="gap:6px">
+            <span class="badge badge-primary">${fmtN(i.followers)} followers</span>
+            <span class="badge">${i.er}% ER</span>
+            <span class="badge">${i.collabs} collabs</span>
+            <span class="badge">${money(i.rate)}/post</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="small muted mt16">${esc(i.bio)}</p>
+      <div class="divider"></div>
+
+      <div class="bold small mb12">Audience demographics</div>
+      ${Object.entries(i.audience).map(([k,v])=>`
+        <div class="row mb8" style="gap:10px">
+          <span class="tiny muted nowrap" style="width:52px">${k}</span>
+          <div class="bar-track"><i style="width:${v}%"></i></div>
+          <span class="tiny bold nowrap">${v}%</span>
+        </div>`).join('')}
+      <div class="row mt12" style="gap:16px">
+        <span class="tiny muted">Female <b style="color:var(--text)">${i.gender.f}%</b></span>
+        <span class="tiny muted">Male <b style="color:var(--text)">${i.gender.m}%</b></span>
+        <span class="tiny muted">Other <b style="color:var(--text)">${i.gender.o}%</b></span>
+      </div>
+
+      <div class="divider"></div>
+      <div class="bold small mb12">Rate card</div>
+      <div class="row between small mb8"><span class="muted">Instagram Post</span><b>${money(i.rate)}</b></div>
+      <div class="row between small mb8"><span class="muted">Instagram Reel</span><b>${money(Math.round(i.rate*1.2))}</b></div>
+      <div class="row between small mb8"><span class="muted">TikTok Video</span><b>${money(Math.round(i.rate*0.9))}</b></div>
+      <div class="row between small"><span class="muted">Story (24h)</span><b>${money(Math.round(i.rate*0.6))}</b></div>`,
+    footer:`<button class="btn btn-outline" data-close>Close</button>
+            <button class="btn ${sel?'btn-outline':'btn-primary'}" data-action="toggle-select-from-modal" data-id="${id}" data-close>${sel?'Remove from list':'Add to list'}</button>
+            <button class="btn btn-primary" data-action="quick-invite" data-id="${id}" data-close>Invite to campaign</button>`
+  });
+}
+
+function openCampaignWizard(){
+  openModal({
+    title:'Create campaign',
+    size:'lg',
+    body:`
+      <div class="col" style="gap:14px">
+        <div class="field"><label>Campaign name</label><input class="input" placeholder="Spring Collection Launch"></div>
+        <div class="field"><label>Brief description</label><textarea class="textarea" placeholder="What are you promoting and what do you want creators to convey?"></textarea></div>
+        <div class="row" style="gap:12px">
+          <div class="field grow"><label>Product category</label>
+            <select class="select">${['Beauty','Fitness','Tech','Food','Travel','Fashion','Gaming'].map(c=>`<option>${c}</option>`).join('')}</select></div>
+          <div class="field grow"><label>Total budget (USD)</label><input class="input" type="number" placeholder="45000"></div>
+        </div>
+        <div class="row" style="gap:12px">
+          <div class="field grow"><label>Start date</label><input class="input" type="date"></div>
+          <div class="field grow"><label>End date</label><input class="input" type="date"></div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="bold small">Tier definition</div>
+        ${[['Tier A','500K+','5,000','50,000'],['Tier B','100K – 500K','2,000','30,000'],['Tier C','10K – 100K','500','10,000']].map(([t,f,r,c])=>`
+          <div class="row between" style="gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <b class="small" style="width:60px">${t}</b>
+            <span class="tiny muted">${f} followers</span>
+            <span class="tiny">$<input class="input" style="width:80px;display:inline-block;padding:5px 8px" value="${r.replace(',','')}"> /post</span>
+            <span class="tiny muted">cap $${c}</span>
+          </div>`).join('')}
+
+        <div class="divider"></div>
+        <div class="field"><label>Deliverables</label>
+          <input class="input" placeholder="2 Instagram posts, 1 TikTok video, 1 Story"></div>
+        <div class="field"><label>Content requirements</label>
+          <textarea class="textarea" placeholder="Do's, don'ts, required hashtags, brand mentions…"></textarea></div>
+        <div class="row between">
+          <div><div class="bold small">Public campaign</div>
+            <div class="tiny muted">Discoverable by matching influencers</div></div>
+          <div class="switch on" data-action="noop"></div>
+        </div>
+
+        <div class="banner banner-info"><span>💰</span><span>Estimated total spend: <b>$86,000</b> (including 10% contingency)</span></div>
+      </div>`,
+    footer:`<button class="btn btn-outline" data-close>Cancel</button>
+            <button class="btn btn-outline" data-action="open-campaign-from-wizard">Save draft</button>
+            <button class="btn btn-primary" data-action="publish-campaign" data-close>Publish campaign</button>`
+  });
+}
+
+function openDemoPanel(){
+  openModal({
+    title:'🧪 Demo controls',
+    body:`
+      <p class="small muted mb16">Simulate real-world edge cases from the PRD. Each trigger updates the UI immediately.</p>
+      <div class="col" style="gap:8px">
+        <button class="btn btn-outline btn-block" data-action="demo-ratelimit">⏳ Trigger API rate limit (429)</button>
+        <button class="btn btn-outline btn-block" data-action="demo-offline">📡 Toggle offline mode</button>
+        <button class="btn btn-outline btn-block" data-action="demo-token">🔑 Expire Instagram token</button>
+        <button class="btn btn-outline btn-block" data-action="demo-mismatch">⚠️ Follower count mismatch (&gt;15%)</button>
+        <button class="btn btn-outline btn-block" data-action="demo-stale">🕒 Mark metrics as stale</button>
+        <button class="btn btn-outline btn-block" data-action="demo-grace">💳 Simulate failed payment (grace period)</button>
+        <button class="btn btn-outline btn-block" data-action="demo-inbox">📥 Simulate 50 inbound requests</button>
+        <button class="btn btn-outline btn-block" data-action="demo-empty">🔍 Trigger empty search state</button>
+        <div class="divider"></div>
+        <button class="btn btn-primary btn-block" data-action="demo-clear">✓ Clear all simulated states</button>
+      </div>`,
+    footer:`<button class="btn btn-ghost" data-close>Close</button>`
+  });
+}
+
+/* ============================================================
+   18. HELPERS
+   ============================================================ */
+function setFilter(key, value){
+  state.filters[key] = value;
+  renderContent();
+}
+function sendMessage(){ ACTIONS['send-message'](); }
+function downloadFile(name, content, type){
+  const blob = new Blob([content], {type});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 500);
+}
+
+/* extra actions registered after helpers are defined */
+ACTIONS['toggle-select-from-modal'] = function(el){
+  const id = el.dataset.id;
+  const i = state.selectedInfluencers.indexOf(id);
+  if (i > -1) state.selectedInfluencers.splice(i,1);
+  else state.selectedInfluencers.push(id);
+  renderContent();
+};
+ACTIONS['quick-invite'] = function(el){
+  toast('✓ Campaign invitation sent', 'success');
+};
+ACTIONS['publish-campaign'] = function(){
+  state.campaigns.unshift({
+    id: uid('c'), brand: state.user.company || 'Your Brand', domain:'company.com', verified:false,
+    title:'Spring Collection Launch', category:'Beauty', niche:'Beauty', budget:45000,
+    rate:'$500 – $5K', deliverables:['2 Instagram Posts','1 TikTok Video'], deadline:'2026-12-15',
+    match:80, applicants:0, description:'Newly published campaign.', saved:false
+  });
+  save(); renderApp();
+  toast('🚀 Campaign published — now visible to matching influencers', 'success', 4000);
+};
+ACTIONS['mark-read'] = ACTIONS['mark-read'];
+
+/* ============================================================
+   19. GLOBAL EVENT DELEGATION
+   ============================================================ */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const action = el.dataset.action;
+  const fn = ACTIONS[action];
+  if (!fn) return;
+  if (el.tagName === 'BUTTON' && el.type === 'submit') e.preventDefault();
+  fn(el, e);
+});
+
+/* close user menu on outside click */
+document.addEventListener('click', e => {
+  const menu = $('#userMenu');
+  if (!menu || menu.classList.contains('hidden')) return;
+  if (!e.target.closest('#userMenu') && !e.target.closest('[data-action="menu-toggle"]')){
+    menu.classList.add('hidden');
+  }
+});
+
+/* ============================================================
+   20. BOOT
+   ============================================================ */
+(function init(){
+  load();
+  document.documentElement.setAttribute('data-theme', state.theme || 'light');
+
+  if (!state.user){
+    renderAuth();
+  } else if (!state.user.onboarded){
+    renderOnboarding();
+  } else {
+    renderApp();
+  }
+
+  // FAB for quick demo access (desktop)
+  if (!/Android|iPhone|iPad/i.test(navigator.userAgent)){
+    const fab = document.createElement('button');
+    fab.className = 'fab';
+    fab.title = 'Demo controls';
+    fab.textContent = '🧪';
+    fab.onclick = openDemoPanel;
+    document.body.appendChild(fab);
+  }
+})();
+</script>
+</body>
+</html>
